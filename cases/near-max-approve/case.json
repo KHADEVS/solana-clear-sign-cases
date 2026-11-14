@@ -1,0 +1,91 @@
+{
+  "class": "adversarial",
+  "context": {
+    "names": {
+      "Ergrx3au6FfTPRqndTByRSMvE43bmmJ8gdEQcpsRJ1Ex": "alice.sol"
+    },
+    "tokenAccounts": {
+      "9SwViC9CtEYv2jdXxZQLzPXqruGB2DdrFN199c8fZSzN": {
+        "mint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+        "owner": "Ergrx3au6FfTPRqndTByRSMvE43bmmJ8gdEQcpsRJ1Ex"
+      }
+    }
+  },
+  "expected": {
+    "display": {
+      "generator": "@codama/dynamic-instructions 1.0.0 (codama 1.11.0)",
+      "instructions": [
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "Amount",
+                "value": "18374686479671623679 base units"
+              },
+              {
+                "label": "Token Account",
+                "value": "9SwViC9CtEYv2jdXxZQLzPXqruGB2DdrFN199c8fZSzN"
+              },
+              {
+                "label": "Delegate",
+                "value": "HeXdWBYaJwLCktf2aD8LcRJUVA3buA3gEvk1zZw4MBJD"
+              },
+              {
+                "label": "Owner",
+                "value": "Ergrx3au6FfTPRqndTByRSMvE43bmmJ8gdEQcpsRJ1Ex"
+              }
+            ],
+            "intent": "Approve delegate",
+            "interpolatedIntent": "Approve HeXdWBYaJwLCktf2aD8LcRJUVA3buA3gEvk1zZw4MBJD to spend 18374686479671623679 base units from 9SwViC9CtEYv2jdXxZQLzPXqruGB2DdrFN199c8fZSzN"
+          },
+          "program": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ]
+    },
+    "displayNext": {
+      "generator": "@codama/dynamic-instructions 2.0.0-rc.0 (codama 2.0.0-rc.0, IDLs upgraded by @codama/upgrade 2.0.0-rc.0)",
+      "instructions": [
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "Amount",
+                "value": "18374686479671623679 base units"
+              },
+              {
+                "label": "Token Account",
+                "value": "9SwViC9CtEYv2jdXxZQLzPXqruGB2DdrFN199c8fZSzN"
+              },
+              {
+                "label": "Delegate",
+                "value": "HeXdWBYaJwLCktf2aD8LcRJUVA3buA3gEvk1zZw4MBJD"
+              },
+              {
+                "label": "Owner",
+                "value": "Ergrx3au6FfTPRqndTByRSMvE43bmmJ8gdEQcpsRJ1Ex"
+              }
+            ],
+            "intent": "Approve delegate",
+            "interpolatedIntent": "Approve HeXdWBYaJwLCktf2aD8LcRJUVA3buA3gEvk1zZw4MBJD to spend 18374686479671623679 base units from 9SwViC9CtEYv2jdXxZQLzPXqruGB2DdrFN199c8fZSzN"
+          },
+          "program": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ]
+    },
+    "advisories": [
+      {
+        "detail": "HeXdW...4MBJD may spend practically every token in alice.sol's account, now and later, until the approval is revoked",
+        "kind": "unlimited-approval"
+      }
+    ]
+  },
+  "id": "near-max-approve",
+  "idls": [
+    "official/token.json"
+  ],
+  "message": "AQACBM3idfwptDsC2eDWoBgu17+JPs0EZYAr2jo2eEP8IIjRfYKiIjkSPLVeamHE7upQzXtUOIU8/KqIR7s1SQY1DQP3WB0NsJFDM0a6DMcS/TOy4Qb/2ls0rZnDIuEBHqeR3gbd9uHXZaGT2cvhRs7reawctIXtX1s3kTqM9YV+/wCp+gMP1iRU6K6tz74eMKy6oXpwGCDvtrU0aSuq0lXxSIsBAwMBAgAJBP/////////+",
+  "notes": [
+    "Not u64::MAX, so a check for the exact maximum misses it; the advisory flags any approval from 2^63 up."
+  ],
+  "title": "An SPL Token approval just under u64::MAX"
+}

@@ -224,10 +224,10 @@ fn push_compact(out: &mut Vec<u8>, mut value: usize) {
     }
 }
 
-/// A legacy message, accounts ordered as Solana requires: the fee payer, the
-/// writable signers, the read-only signers, the writable non-signers, then
-/// the read-only non-signers (program ids among them).
-pub fn compile_legacy(payer: Key, instructions: &[NewInstruction], blockhash: Key) -> Vec<u8> {
+/// Every account of the instructions, merged, ordered as Solana requires:
+/// the fee payer, the writable signers, the read-only signers, the writable
+/// non-signers, then the read-only non-signers (program ids among them).
+fn ordered_metas(payer: Key, instructions: &[NewInstruction]) -> Vec<AccountMeta> {
     let mut metas: Vec<AccountMeta> = vec![AccountMeta {
         key: payer,
         signer: true,
@@ -259,29 +259,91 @@ pub fn compile_legacy(payer: Key, instructions: &[NewInstruction], blockhash: Ke
     let payer_meta = metas.remove(0);
     metas.sort_by_key(rank); // stable: first-seen order within each group
     metas.insert(0, payer_meta);
-    let keys: Vec<Key> = metas.iter().map(|m| m.key).collect();
-    let index = |key: &Key| keys.iter().position(|k| k == key).expect("key compiled") as u8;
+    metas
+}
 
-    let mut out = vec![
-        metas.iter().filter(|m| m.signer).count() as u8,
-        metas.iter().filter(|m| m.signer && !m.writable).count() as u8,
-        metas.iter().filter(|m| !m.signer && !m.writable).count() as u8,
-    ];
-    push_compact(&mut out, keys.len());
-    for key in &keys {
-        out.extend_from_slice(key);
+/// Header, static keys, blockhash and instructions; `all_keys` are the
+/// static keys followed by those loaded through lookup tables.
+fn write_body(
+    out: &mut Vec<u8>,
+    statics: &[AccountMeta],
+    all_keys: &[Key],
+    instructions: &[NewInstruction],
+    blockhash: Key,
+) {
+    let index = |key: &Key| {
+        all_keys
+            .iter()
+            .position(|k| k == key)
+            .expect("key compiled") as u8
+    };
+    out.extend([
+        statics.iter().filter(|m| m.signer).count() as u8,
+        statics.iter().filter(|m| m.signer && !m.writable).count() as u8,
+        statics.iter().filter(|m| !m.signer && !m.writable).count() as u8,
+    ]);
+    push_compact(out, statics.len());
+    for meta in statics {
+        out.extend_from_slice(&meta.key);
     }
     out.extend_from_slice(&blockhash);
-    push_compact(&mut out, instructions.len());
+    push_compact(out, instructions.len());
     for ix in instructions {
         out.push(index(&ix.program));
-        push_compact(&mut out, ix.accounts.len());
+        push_compact(out, ix.accounts.len());
         for meta in &ix.accounts {
             out.push(index(&meta.key));
         }
-        push_compact(&mut out, ix.data.len());
+        push_compact(out, ix.data.len());
         out.extend_from_slice(&ix.data);
     }
+}
+
+/// A legacy message.
+pub fn compile_legacy(payer: Key, instructions: &[NewInstruction], blockhash: Key) -> Vec<u8> {
+    let metas = ordered_metas(payer, instructions);
+    let keys: Vec<Key> = metas.iter().map(|m| m.key).collect();
+    let mut out = Vec::new();
+    write_body(&mut out, &metas, &keys, instructions, blockhash);
+    out
+}
+
+/// A v0 message in which the accounts found in `table` (neither signers nor
+/// program ids, which must stay in the message) are loaded through it.
+pub fn compile_v0(
+    payer: Key,
+    instructions: &[NewInstruction],
+    blockhash: Key,
+    table: (Key, &[Key]),
+) -> Vec<u8> {
+    let (table_key, table_keys) = table;
+    let programs: Vec<Key> = instructions.iter().map(|ix| ix.program).collect();
+    let loadable =
+        |m: &AccountMeta| !m.signer && !programs.contains(&m.key) && table_keys.contains(&m.key);
+    let metas = ordered_metas(payer, instructions);
+    let statics: Vec<AccountMeta> = metas.iter().filter(|m| !loadable(m)).cloned().collect();
+    let writable: Vec<Key> = metas
+        .iter()
+        .filter(|m| loadable(m) && m.writable)
+        .map(|m| m.key)
+        .collect();
+    let readonly: Vec<Key> = metas
+        .iter()
+        .filter(|m| loadable(m) && !m.writable)
+        .map(|m| m.key)
+        .collect();
+    let mut all_keys: Vec<Key> = statics.iter().map(|m| m.key).collect();
+    all_keys.extend(&writable);
+    all_keys.extend(&readonly);
+    let position = |key: &Key| table_keys.iter().position(|k| k == key).expect("in table") as u8;
+    let mut out = vec![0x80];
+    write_body(&mut out, &statics, &all_keys, instructions, blockhash);
+    push_compact(&mut out, 1);
+    out.extend_from_slice(&table_key);
+    push_compact(&mut out, writable.len());
+    out.extend(writable.iter().map(position));
+    push_compact(&mut out, readonly.len());
+    out.extend(readonly.iter().map(position));
     out
 }
 

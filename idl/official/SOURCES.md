@@ -1,0 +1,5 @@
+- `system.json`: https://github.com/solana-program/system/blob/0e7dc5d918e2d404bbbe57542afdd56b242c3ce5/idl.json
+- `token.json`: https://github.com/solana-program/token/blob/ef37669b93adc060f2524c37d3c4a264695b2eed/idl.json
+- `associated-token-account.json`: https://github.com/solana-program/associated-token-account/blob/fbf5379e7398ac8b231c73ee8a9ff677b43dd0ec/idl.json
+- `compute-budget.json`: https://github.com/solana-program/compute-budget/blob/e189b8ca25ecc283354b96f12cdcd6d7f4246921/idl.json
+- `token-2022.json`: https://github.com/solana-program/token-2022/blob/e8ca680ca8aeb12f9598524b003c776c6a4168f2/idl.json

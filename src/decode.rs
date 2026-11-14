@@ -1,9 +1,9 @@
-//! A renderer for sRFC 39 display metadata, written to follow the draft as
-//! literally as possible. Where the draft is ambiguous, the choice made is
-//! named in a comment and in the cases' notes.
+//! Decoding instructions against Codama IDLs (official solana-program IDLs or
+//! hand-written ones in the same format), for the advisories. The expected
+//! displays come from Codama itself (tools/codama), not from this crate.
 
 use crate::message::Instruction;
-use crate::util::{format_amount, from_b58, short, Key};
+use crate::util::{from_b58, short, Key};
 use serde_json::Value;
 use std::collections::HashMap;
 
@@ -25,6 +25,9 @@ pub struct Context {
     pub tokens: HashMap<Key, TokenInfo>,
     pub token_accounts: HashMap<Key, TokenAccount>,
     pub accounts: HashMap<Key, Vec<u8>>,
+    /// Programs whose display metadata this wallet has vetted (the curated
+    /// list the sRFC 39 discussion asks for); `None` when the case has none.
+    pub trusted_programs: Option<Vec<Key>>,
 }
 
 impl Context {
@@ -63,11 +66,20 @@ impl Context {
             ctx.token_accounts
                 .insert(from_b58(&key)?, TokenAccount { owner, mint });
         }
-        for (key, data) in map("accounts") {
+        for (key, entry) in map("accounts") {
+            // Either the data alone, or { data, owner } as the Codama display needs.
+            let text = entry.as_str().or(entry["data"].as_str());
             let data = base64::engine::general_purpose::STANDARD
-                .decode(data.as_str().ok_or("account data is not text")?)
+                .decode(text.ok_or("account data is not text")?)
                 .map_err(|e| format!("account data: {e}"))?;
             ctx.accounts.insert(from_b58(&key)?, data);
+        }
+        if let Some(list) = value.get("trustedPrograms").and_then(Value::as_array) {
+            ctx.trusted_programs = Some(
+                list.iter()
+                    .map(|k| from_b58(k.as_str().unwrap_or("")))
+                    .collect::<Result<_, _>>()?,
+            );
         }
         Ok(ctx)
     }
@@ -75,15 +87,29 @@ impl Context {
     pub fn name_or_short(&self, key: &Key) -> String {
         self.names.get(key).cloned().unwrap_or_else(|| short(key))
     }
+
+    /// A token account by its owner, as wallets show it; anything else by name.
+    pub fn holder(&self, key: &Key) -> String {
+        match self.token_accounts.get(key) {
+            Some(account) => self.name_or_short(&account.owner),
+            None => self.name_or_short(key),
+        }
+    }
 }
 
 /// Program IDLs by program id.
 pub struct Programs(HashMap<Key, Value>);
 
 impl Programs {
-    pub fn new(programs: Vec<Value>) -> Result<Self, String> {
+    /// From Codama roots (or bare program nodes), by program id.
+    pub fn new(idls: Vec<Value>) -> Result<Self, String> {
         let mut map = HashMap::new();
-        for program in programs {
+        for idl in idls {
+            let program = if idl["kind"] == "rootNode" {
+                idl["program"].clone()
+            } else {
+                idl
+            };
             let id = from_b58(
                 program["publicKey"]
                     .as_str()
@@ -92,6 +118,10 @@ impl Programs {
             map.insert(id, program);
         }
         Ok(Programs(map))
+    }
+
+    pub fn name(&self, id: &Key) -> Option<&str> {
+        self.0.get(id).and_then(|p| p["name"].as_str())
     }
 }
 
@@ -112,14 +142,14 @@ pub struct Decoded<'a> {
 }
 
 impl Decoded<'_> {
-    fn account(&self, name: &str) -> Option<&Key> {
+    pub fn account(&self, name: &str) -> Option<&Key> {
         self.accounts
             .iter()
             .find(|(node, _)| node["name"] == name)
             .map(|(_, key)| key)
     }
 
-    fn arg(&self, name: &str) -> Option<&(&Value, V)> {
+    pub fn arg(&self, name: &str) -> Option<&(&Value, V)> {
         self.args.iter().find(|(node, _)| node["name"] == name)
     }
 }
@@ -221,8 +251,20 @@ fn matches(node: &Value, data: &[u8]) -> Result<bool, String> {
         return Ok(false);
     };
     for disc in discriminators {
+        if kind(disc) == "sizeDiscriminatorNode" {
+            if data.len() as u64
+                != disc["size"]
+                    .as_u64()
+                    .ok_or("size discriminator without size")?
+            {
+                return Ok(false);
+            }
+            continue;
+        }
+        // A discriminator kind not supported here never matches: the
+        // instruction is then reported as unknown, never misread.
         if kind(disc) != "fieldDiscriminatorNode" {
-            return Err(format!("discriminator {} not supported yet", kind(disc)));
+            return Ok(false);
         }
         let name = disc["name"].as_str().ok_or("discriminator without name")?;
         let offset = disc["offset"].as_u64().unwrap_or(0) as usize;
@@ -259,11 +301,16 @@ pub fn decode<'a>(programs: &'a Programs, ix: &Instruction) -> Result<Option<Dec
     let account_nodes = node["accounts"]
         .as_array()
         .ok_or("instruction without accounts")?;
-    if ix.accounts.len() < account_nodes.len() {
+    // Optional accounts may be left out at the end (official IDLs mark them).
+    let required = account_nodes
+        .iter()
+        .filter(|a| a["isOptional"].as_bool() != Some(true))
+        .count();
+    if ix.accounts.len() < required {
         return Err(format!(
-            "{} expects {} accounts, got {}",
+            "{} expects at least {} accounts, got {}",
             node["name"],
-            account_nodes.len(),
+            required,
             ix.accounts.len()
         ));
     }
@@ -293,196 +340,4 @@ pub fn decode<'a>(programs: &'a Programs, ix: &Instruction) -> Result<Option<Dec
         accounts,
         args,
     }))
-}
-
-/// sRFC 39 `skip`. "withAdditionalMetadata" follows the draft's example (the
-/// mint shows only when no metadata is available), not its definition, which
-/// says the opposite. See the cases' notes.
-fn shown(node: &Value, with_metadata: bool) -> bool {
-    match node["display"]["skip"].as_str().unwrap_or("never") {
-        "always" => false,
-        "withAdditionalMetadata" => !with_metadata,
-        _ => true,
-    }
-}
-
-fn label(node: &Value) -> String {
-    node["display"]["label"]
-        .as_str()
-        .or(node["name"].as_str())
-        .unwrap_or("?")
-        .to_string()
-}
-
-/// AccountFormatter. With metadata, a token account shows as its owner (the
-/// draft's example does this; its last open question asks whether it should).
-pub fn account_text(key: &Key, ctx: Option<&Context>) -> String {
-    let Some(ctx) = ctx else {
-        return short(key);
-    };
-    if let Some(account) = ctx.token_accounts.get(key) {
-        return ctx.name_or_short(&account.owner);
-    }
-    if let Some(token) = ctx.tokens.get(key) {
-        return token.symbol.clone();
-    }
-    ctx.name_or_short(key)
-}
-
-fn plain(value: &V) -> String {
-    match value {
-        V::Int(n) => n.to_string(),
-        V::Str(s) => s.clone(),
-        V::Bytes(b) => b.iter().map(|x| format!("{x:02x}")).collect(),
-        V::Key(k) => short(k),
-        // The draft does not say how to show an absent optional value.
-        V::None => "none".into(),
-    }
-}
-
-fn arg_text(node: &Value, value: &V, d: &Decoded, ctx: Option<&Context>) -> Result<String, String> {
-    let formatter = &node["display"]["formatter"];
-    match kind(formatter) {
-        "" => Ok(plain(value)),
-        "amountFormatterNode" => {
-            let V::Int(raw) = value else {
-                return Err("amountFormatterNode on a value that is not a number".into());
-            };
-            let mut decimals = None;
-            let mut symbol = None;
-            if formatter["isNative"].as_bool() == Some(true) {
-                decimals = Some(9);
-                symbol = Some("SOL".to_string());
-            }
-            // The draft defines `decimals` as a number of places; its example
-            // passes the name of an argument. Both are accepted.
-            match &formatter["decimals"] {
-                Value::Number(n) => decimals = n.as_u64().map(|n| n as u32),
-                Value::String(name) => match d.arg(name) {
-                    Some((_, V::Int(n))) => decimals = Some(*n as u32),
-                    _ => return Err(format!("decimals names no number argument: {name}")),
-                },
-                _ => {}
-            }
-            if let (Some(account), Some(ctx)) = (formatter["token"].as_str(), ctx) {
-                let key = d
-                    .account(account)
-                    .ok_or_else(|| format!("token names no account: {account}"))?;
-                // The draft's `token` names the mint; for instructions that
-                // carry no mint (approve), it names a token account, read
-                // through its mint.
-                let mint = ctx.token_accounts.get(key).map(|a| a.mint).unwrap_or(*key);
-                if let Some(info) = ctx.tokens.get(&mint) {
-                    symbol = Some(info.symbol.clone());
-                    decimals = decimals.or(Some(info.decimals));
-                }
-            }
-            let number = match decimals {
-                Some(places) => format_amount(*raw, places),
-                None => raw.to_string(),
-            };
-            Ok(match symbol {
-                Some(symbol) => format!("{number} {symbol}"),
-                None => number,
-            })
-        }
-        other => Err(format!("formatter {other} not supported yet")),
-    }
-}
-
-/// `None` when a placeholder needs metadata this context does not have.
-fn interpolate(template: &str, d: &Decoded, ctx: &Context) -> Result<Option<String>, String> {
-    let mut out = String::new();
-    let mut rest = template;
-    while let Some(open) = rest.find('{') {
-        out.push_str(&rest[..open]);
-        let close = rest[open..]
-            .find('}')
-            .ok_or("unclosed { in an interpolated intent")?
-            + open;
-        let path = &rest[open + 1..close];
-        let (name, field) = match path.split_once('.') {
-            Some((name, field)) => (name, Some(field)),
-            None => (path, None),
-        };
-        let text = if let Some(key) = d.account(name) {
-            match field {
-                None => account_text(key, Some(ctx)),
-                Some("owner") => match ctx.token_accounts.get(key) {
-                    Some(account) => ctx.name_or_short(&account.owner),
-                    None => return Ok(None),
-                },
-                Some(other) => return Err(format!("field .{other} not supported in {{{path}}}")),
-            }
-        } else if let Some((node, value)) = d.arg(name) {
-            arg_text(node, value, d, Some(ctx))?
-        } else {
-            return Err(format!("{{{path}}} names no account or argument"));
-        };
-        out.push_str(&text);
-        rest = &rest[close + 1..];
-    }
-    out.push_str(rest);
-    Ok(Some(out))
-}
-
-#[derive(Debug, PartialEq)]
-pub struct Rendered {
-    /// The interpolated intents joined with " and "; only with metadata, and
-    /// only when every instruction has one.
-    pub interpolated: Option<String>,
-    pub fallback: Vec<String>,
-}
-
-pub fn render(
-    programs: &Programs,
-    instructions: &[Instruction],
-    ctx: Option<&Context>,
-) -> Result<Rendered, String> {
-    let with_metadata = ctx.is_some();
-    let mut fallback = Vec::new();
-    let mut intents: Option<Vec<String>> = ctx.map(|_| Vec::new());
-    for ix in instructions {
-        let Some(d) = decode(programs, ix)? else {
-            // The draft says nothing about programs without an IDL.
-            fallback.push(format!("Unknown program: {}", short(&ix.program)));
-            fallback.push(format!("Data: {}", plain(&V::Bytes(ix.data.clone()))));
-            intents = None;
-            continue;
-        };
-        let display = &d.node["display"];
-        let intent = display["intent"]
-            .as_str()
-            .or(d.node["name"].as_str())
-            .unwrap_or("?");
-        fallback.push(intent.to_string());
-        for (node, key) in &d.accounts {
-            if shown(node, with_metadata) {
-                fallback.push(format!("{}: {}", label(node), account_text(key, ctx)));
-            }
-        }
-        for (node, value) in &d.args {
-            if shown(node, with_metadata) {
-                fallback.push(format!(
-                    "{}: {}",
-                    label(node),
-                    arg_text(node, value, &d, ctx)?
-                ));
-            }
-        }
-        if let (Some(ctx), Some(_)) = (ctx, intents.as_ref()) {
-            let piece = match display["interpolatedIntent"].as_str() {
-                Some(template) => interpolate(template, &d, ctx)?,
-                None => Some(intent.to_string()),
-            };
-            match piece {
-                Some(piece) => intents.as_mut().expect("checked").push(piece),
-                None => intents = None,
-            }
-        }
-    }
-    Ok(Rendered {
-        interpolated: intents.map(|pieces| pieces.join(" and ")),
-        fallback,
-    })
 }

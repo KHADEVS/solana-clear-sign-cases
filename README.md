@@ -1,69 +1,65 @@
 # Clear-sign cases for Solana
 
-Conformance cases for [sRFC 39 (Solana Clear Sign)](https://github.com/solana-foundation/SRFCs/discussions/4), and a small renderer that follows the draft as literally as it can, to check them against.
+Shared test cases for clear signing on Solana: real and adversarial transactions, with what [Codama](https://github.com/codama-idl/codama)'s own instruction display shows for them, so any other implementation (a wallet, a hardware signer, a Rust or mobile decoder) can check that it shows the same thing.
 
-Each case is a real serialized transaction, the enriched IDLs it needs, and the exact text a renderer must produce. Any wallet, hardware signer or decoder can run the cases to see whether it shows what the spec says.
+Clear signing on Solana started as [sRFC 39](https://github.com/solana-foundation/SRFCs/discussions/4) and now lives in the [Codama spec](https://github.com/codama-idl/spec) (display nodes), in the display metadata of the official [solana-program](https://github.com/solana-program) IDLs, and in `@codama/dynamic-instructions`, which renders them. These cases take that as the reference.
 
-This is an early draft, built to propose a format in the sRFC 39 discussion. The format and the cases will change with the feedback there.
+This is an early draft, built to be discussed with the people working on it. The format and the cases will change with their feedback.
 
-## Two layers
-
-- **Rendering** follows sRFC 39: the interpolated intent, the fallback list, and the fallback without additional metadata (the three outputs in the draft's own `transferChecked` example).
-- **Advisories** are what a careful wallet should flag on top of the rendering: a durable nonce, an unlimited approval, an authority change, a transaction nested in a multisig approval. The draft does not cover them, so they are kept apart and are not normative.
-
-## Cases
-
-| Case | What it checks |
-| --- | --- |
-| `spec-transfer-checked` | The draft's own example: Token-2022 `transferChecked`, 10 wSOL to toly.sol |
-| `system-transfer` | A plain SOL transfer to a named address |
-| `durable-nonce-transfer` | A transfer signed with a durable nonce: the signature does not expire |
-| `unlimited-approve` | An SPL Token approval of `u64::MAX` to an unknown delegate |
-| `squads-nested-approval` | A durable-nonce approval of a Squads proposal that hands over a program's upgrade authority, modeled on the Drift exploit |
-
-## Layout
-
-```
-cases/<id>/case.json   one case
-idl/<program>.json     the enriched IDLs the cases name (Codama programNode, sRFC 39 display nodes)
-```
-
-`case.json`:
+## What a case holds
 
 | Field | Content |
 | --- | --- |
 | `message` | The message a signer signs, base64 (legacy or v0) |
 | `lookupTables` | For v0 messages: each lookup table's addresses |
-| `idls` | IDL files under `idl/` |
-| `context` | The additional metadata a wallet may have: `names` (address book, name service), `tokens` (symbol, decimals), `tokenAccounts` (owner, mint), `accounts` (raw account data, base64) |
-| `expected.interpolated` | The interpolated intents, joined with " and " |
-| `expected.fallback` | The fallback lines, with the context |
-| `expected.fallbackWithoutMetadata` | The fallback lines, with no context at all |
-| `expected.advisories` | `{ kind, detail }`, not normative |
-| `notes` | Where the draft is ambiguous, and the reading this case takes |
+| `idls` | The Codama IDLs used, under `idl/` |
+| `context.accounts` | Account state the display may read (`{ data, owner }`, base64) |
+| `expected.display` | What Codama's stable display shows, per instruction (`null`: it cannot identify the instruction) |
+| `expected.displayNext` | The same with the Codama 2.0 release candidate |
+| `expected.advisories` | What a careful wallet should flag on top: ours, not part of any spec |
+| `notes` | Why the case is there, and what it shows |
+
+`context.names`, `context.tokenAccounts` and `context.trustedPrograms` only feed the advisories: names and symbols are the wallet's business, not the display's.
+
+## Cases
+
+| Case | What it checks |
+| --- | --- |
+| `system-transfer` | A plain SOL transfer |
+| `token-2022-transfer-checked` | The transfer of sRFC 39's own example, with the official Token-2022 IDL |
+| `v0-lookup-transfer` | A USDC transfer whose mint and destination come from an address lookup table |
+| `ata-create-both-forms` | Associated token account creation with data `[0]` and with empty data, both valid for the program |
+| `durable-nonce-transfer` | A transfer signed with a durable nonce: the signature does not expire |
+| `unlimited-approve` | An approval of `u64::MAX` to an unknown delegate |
+| `near-max-approve` | An approval just under `u64::MAX` |
+| `trezor-6843-co-signed-transfer` | A real Mainnet message from trezor-firmware#6843: a transfer that lists an extra signer |
+| `squads-nested-approval` | A durable-nonce approval of a Squads proposal that hands over a program's upgrade authority, modeled on the Drift exploit |
+| `lying-metadata` | A program whose own IDL calls an instruction an airdrop claim |
+
+## What the cases show today
+
+Checked on 2026-11-14 with `@codama/dynamic-instructions` 1.0.0 and 2.0.0-rc.0:
+
+1. **An extra account is invisible in the stable display.** In the `trezor-6843` message, the transfer lists an extra signer; 1.0.0 does not show it, 2.0.0-rc.0 lists it as a "Remaining Account" in the fields (not in the sentence).
+2. **Two valid forms, two different gaps.** The Associated Token Account program reads both empty data and `[0]` as Create. The official IDL matches `[0]` only, so Codama shows the empty form as unknown; Trezor's firmware handles the empty form only ([trezor-firmware#4387](https://github.com/trezor/trezor-firmware/issues/4387)).
+3. **Approvals read in base units.** `approve` carries no mint, so `u64::MAX` reads "18446744073709551615 base units". Ledger proposed a `maxThreshold` in the sRFC 39 discussion.
+4. **A Squads approval shows addresses only.** What it executes sits in another account, which the instruction does not reference.
+5. **A durable nonce shows as an account, not as a signature that never expires.**
+6. **An absent optional value** reads "none" in 1.0.0 and "None" in 2.0.0-rc.0.
+7. **Metadata that lies is displayed faithfully.** Only where the metadata comes from can be checked (curated lists, signed IDLs).
 
 ## Running
 
 ```
-cargo run --bin check            # the renderer against every case
-cargo run --bin check -- <dir>   # against another set of cases
-cargo run --bin gen              # rebuild the cases (same bytes every time)
+cargo run --bin gen                       # build the case inputs (same bytes every time)
+npm --prefix tools/codama install
+node tools/codama/generate.mjs            # fill the expected displays with Codama
+node tools/codama/generate.mjs --check    # check they still match
+cargo run --bin check                     # check decoding and advisories
 cargo test
 ```
 
-The expected outputs are written by hand in `src/bin/gen.rs`, never computed by the renderer they check.
-
-## What the first cases found in the draft
-
-1. The example's expected text ends with a period that its template does not have.
-2. `{destination}` names the token account, but the expected text shows its owner; another section writes `{destination.owner}`.
-3. The mint's label is "Token Mint", but the output without metadata reads "Token".
-4. `skip: "withAdditionalMetadata"` is defined as "SHOULD NOT display the account unless additional metadata is available", yet the example shows the mint only when metadata is missing.
-5. `amountFormatterNode.decimals` is defined as a number of places, but the example passes the name of an argument.
-6. A Squads approval cannot be rendered meaningfully: what it executes lives in another account, which the instruction does not reference (the account-data formatters Ledger asked for).
-7. Nothing says how to show an absent optional value, or an instruction from a program with no IDL.
-
-Each case's `notes` say which reading it takes.
+`idl/official/` holds the official IDLs at the commits listed in `idl/official/SOURCES.md`. `idl/custom/` holds IDLs written for these cases in the same format (Squads, the upgradeable loader, the lying airdrop). `real/` holds real transactions.
 
 ## License
 

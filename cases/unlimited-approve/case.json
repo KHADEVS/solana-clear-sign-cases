@@ -5,48 +5,87 @@
       "Ergrx3au6FfTPRqndTByRSMvE43bmmJ8gdEQcpsRJ1Ex": "alice.sol"
     },
     "tokenAccounts": {
-      "2YG6ei5dAt6TwmnZdNTsxtfDAmkxBA7mz581sNA3mRoD": {
+      "9SwViC9CtEYv2jdXxZQLzPXqruGB2DdrFN199c8fZSzN": {
         "mint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
         "owner": "Ergrx3au6FfTPRqndTByRSMvE43bmmJ8gdEQcpsRJ1Ex"
-      }
-    },
-    "tokens": {
-      "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": {
-        "decimals": 6,
-        "symbol": "USDC"
       }
     }
   },
   "expected": {
+    "display": {
+      "generator": "@codama/dynamic-instructions 1.0.0 (codama 1.11.0)",
+      "instructions": [
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "Amount",
+                "value": "18446744073709551615 base units"
+              },
+              {
+                "label": "Token Account",
+                "value": "9SwViC9CtEYv2jdXxZQLzPXqruGB2DdrFN199c8fZSzN"
+              },
+              {
+                "label": "Delegate",
+                "value": "HeXdWBYaJwLCktf2aD8LcRJUVA3buA3gEvk1zZw4MBJD"
+              },
+              {
+                "label": "Owner",
+                "value": "Ergrx3au6FfTPRqndTByRSMvE43bmmJ8gdEQcpsRJ1Ex"
+              }
+            ],
+            "intent": "Approve delegate",
+            "interpolatedIntent": "Approve HeXdWBYaJwLCktf2aD8LcRJUVA3buA3gEvk1zZw4MBJD to spend 18446744073709551615 base units from 9SwViC9CtEYv2jdXxZQLzPXqruGB2DdrFN199c8fZSzN"
+          },
+          "program": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ]
+    },
+    "displayNext": {
+      "generator": "@codama/dynamic-instructions 2.0.0-rc.0 (codama 2.0.0-rc.0, IDLs upgraded by @codama/upgrade 2.0.0-rc.0)",
+      "instructions": [
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "Amount",
+                "value": "18446744073709551615 base units"
+              },
+              {
+                "label": "Token Account",
+                "value": "9SwViC9CtEYv2jdXxZQLzPXqruGB2DdrFN199c8fZSzN"
+              },
+              {
+                "label": "Delegate",
+                "value": "HeXdWBYaJwLCktf2aD8LcRJUVA3buA3gEvk1zZw4MBJD"
+              },
+              {
+                "label": "Owner",
+                "value": "Ergrx3au6FfTPRqndTByRSMvE43bmmJ8gdEQcpsRJ1Ex"
+              }
+            ],
+            "intent": "Approve delegate",
+            "interpolatedIntent": "Approve HeXdWBYaJwLCktf2aD8LcRJUVA3buA3gEvk1zZw4MBJD to spend 18446744073709551615 base units from 9SwViC9CtEYv2jdXxZQLzPXqruGB2DdrFN199c8fZSzN"
+          },
+          "program": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ]
+    },
     "advisories": [
       {
-        "detail": "HeXdW...4MBJD may spend every token in alice.sol's account, now and later, until the approval is revoked",
+        "detail": "HeXdW...4MBJD may spend practically every token in alice.sol's account, now and later, until the approval is revoked",
         "kind": "unlimited-approval"
       }
-    ],
-    "fallback": [
-      "Approve a delegate",
-      "From: alice.sol",
-      "Delegate: HeXdW...4MBJD",
-      "Amount: 18446744073709.551615 USDC"
-    ],
-    "fallbackWithoutMetadata": [
-      "Approve a delegate",
-      "From: 2YG6e...3mRoD",
-      "Delegate: HeXdW...4MBJD",
-      "Amount: 18446744073709551615"
-    ],
-    "interpolated": "Allow HeXdW...4MBJD to spend 18446744073709.551615 USDC from alice.sol"
+    ]
   },
   "id": "unlimited-approve",
   "idls": [
-    "spl-token.json"
+    "official/token.json"
   ],
-  "message": "AQACBM3idfwptDsC2eDWoBgu17+JPs0EZYAr2jo2eEP8IIjRFt3DQQFvYpfloHiWdeTkzRHa/8Yrjf25YmTCrx+pf7j3WB0NsJFDM0a6DMcS/TOy4Qb/2ls0rZnDIuEBHqeR3gbd9uHXZaGT2cvhRs7reawctIXtX1s3kTqM9YV+/wCp+gMP1iRU6K6tz74eMKy6oXpwGCDvtrU0aSuq0lXxSIsBAwMBAgAJBP//////////",
+  "message": "AQACBM3idfwptDsC2eDWoBgu17+JPs0EZYAr2jo2eEP8IIjRfYKiIjkSPLVeamHE7upQzXtUOIU8/KqIR7s1SQY1DQP3WB0NsJFDM0a6DMcS/TOy4Qb/2ls0rZnDIuEBHqeR3gbd9uHXZaGT2cvhRs7reawctIXtX1s3kTqM9YV+/wCp+gMP1iRU6K6tz74eMKy6oXpwGCDvtrU0aSuq0lXxSIsBAwMBAgAJBP//////////",
   "notes": [
-    "The draft has no way to say that u64::MAX means unlimited, so the rendering shows the raw maximum; Ledger proposed maxThreshold and maxLabel for this.",
-    "approve carries no mint: the formatter's \"token\" names the source token account, read through its mint when metadata is available."
+    "approve carries no mint, so the official IDL shows the amount in base units; Ledger proposed maxThreshold in the sRFC 39 discussion so that u64::MAX reads as unlimited."
   ],
-  "srfc39": "sRFC 39 draft (solana-foundation/SRFCs discussion #4), as of 2026-06-11",
   "title": "An SPL Token approval of u64::MAX to an unknown delegate"
 }

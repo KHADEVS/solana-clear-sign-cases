@@ -1,43 +1,107 @@
 {
   "class": "adversarial",
-  "context": {
-    "names": {
-      "Ergrx3au6FfTPRqndTByRSMvE43bmmJ8gdEQcpsRJ1Ex": "alice.sol"
-    }
-  },
+  "context": {},
   "expected": {
+    "display": {
+      "generator": "@codama/dynamic-instructions 1.0.0 (codama 1.11.0)",
+      "instructions": [
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "Nonce Account",
+                "value": "CcQnrYxoZdQsjHHtVubCVvj6a8k3moBkev9LD2MU4cn3"
+              },
+              {
+                "label": "Nonce Authority",
+                "value": "Ergrx3au6FfTPRqndTByRSMvE43bmmJ8gdEQcpsRJ1Ex"
+              }
+            ],
+            "intent": "Advance nonce account",
+            "interpolatedIntent": "Advance nonce account CcQnrYxoZdQsjHHtVubCVvj6a8k3moBkev9LD2MU4cn3"
+          },
+          "program": "11111111111111111111111111111111"
+        },
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "Amount",
+                "value": "1.5 SOL"
+              },
+              {
+                "label": "From",
+                "value": "Ergrx3au6FfTPRqndTByRSMvE43bmmJ8gdEQcpsRJ1Ex"
+              },
+              {
+                "label": "To",
+                "value": "GuCFSs3NfW4Z5ZGcNFPwbjycRrNYKB3H9UkBGyvAzD1D"
+              }
+            ],
+            "intent": "Transfer SOL",
+            "interpolatedIntent": "Transfer 1.5 SOL from Ergrx3au6FfTPRqndTByRSMvE43bmmJ8gdEQcpsRJ1Ex to GuCFSs3NfW4Z5ZGcNFPwbjycRrNYKB3H9UkBGyvAzD1D"
+          },
+          "program": "11111111111111111111111111111111"
+        }
+      ]
+    },
+    "displayNext": {
+      "generator": "@codama/dynamic-instructions 2.0.0-rc.0 (codama 2.0.0-rc.0, IDLs upgraded by @codama/upgrade 2.0.0-rc.0)",
+      "instructions": [
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "Nonce Account",
+                "value": "CcQnrYxoZdQsjHHtVubCVvj6a8k3moBkev9LD2MU4cn3"
+              },
+              {
+                "label": "Nonce Authority",
+                "value": "Ergrx3au6FfTPRqndTByRSMvE43bmmJ8gdEQcpsRJ1Ex"
+              }
+            ],
+            "intent": "Advance nonce account",
+            "interpolatedIntent": "Advance nonce account CcQnrYxoZdQsjHHtVubCVvj6a8k3moBkev9LD2MU4cn3"
+          },
+          "program": "11111111111111111111111111111111"
+        },
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "Amount",
+                "value": "1.5 SOL"
+              },
+              {
+                "label": "From",
+                "value": "Ergrx3au6FfTPRqndTByRSMvE43bmmJ8gdEQcpsRJ1Ex"
+              },
+              {
+                "label": "To",
+                "value": "GuCFSs3NfW4Z5ZGcNFPwbjycRrNYKB3H9UkBGyvAzD1D"
+              }
+            ],
+            "intent": "Transfer SOL",
+            "interpolatedIntent": "Transfer 1.5 SOL from Ergrx3au6FfTPRqndTByRSMvE43bmmJ8gdEQcpsRJ1Ex to GuCFSs3NfW4Z5ZGcNFPwbjycRrNYKB3H9UkBGyvAzD1D"
+          },
+          "program": "11111111111111111111111111111111"
+        }
+      ]
+    },
     "advisories": [
       {
         "detail": "this signature stays valid until nonce account CcQnr...U4cn3 is advanced; a normal signature expires within minutes",
         "kind": "durable-nonce"
       }
-    ],
-    "fallback": [
-      "Advance durable nonce",
-      "Nonce account: CcQnr...U4cn3",
-      "Nonce authority: alice.sol",
-      "Transfer SOL",
-      "To: GuCFS...AzD1D",
-      "Amount: 1.5 SOL"
-    ],
-    "fallbackWithoutMetadata": [
-      "Advance durable nonce",
-      "Nonce account: CcQnr...U4cn3",
-      "Nonce authority: Ergrx...RJ1Ex",
-      "Transfer SOL",
-      "To: GuCFS...AzD1D",
-      "Amount: 1.5 SOL"
-    ],
-    "interpolated": "Advance durable nonce CcQnr...U4cn3 and Transfer 1.5 SOL to GuCFS...AzD1D"
+    ]
   },
   "id": "durable-nonce-transfer",
   "idls": [
-    "system.json"
+    "official/system.json"
   ],
   "message": "AQACBc3idfwptDsC2eDWoBgu17+JPs0EZYAr2jo2eEP8IIjRrILI3I+mMB3eHgQCL7BSVb9uDqpt3K3bVUR2fvtkSQjsPjmvHOaKMSrEWS8yizAYkila64efhCEK+FTO1Jfv1Aan1RcZLFaO4IqEX3PSl4jPA1wxRbIas0TYBi6pQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACnTRZ4byj1Jo8ucYYfxwkByYHB5jV7opjJnZFZ0adnIQIEAwEDAAQEAAAABAIAAgwCAAAAAC9oWQAAAAA=",
   "notes": [
-    "The rendering says nothing about how long the signature stays valid; only the advisory does. SIMD discussion #513 proposes an explicit warning."
+    "The display names the nonce account but says nothing about how long the signature stays valid; SIMD discussion #513 proposes an explicit warning, and SIMD-0723 proposes removing durable nonces."
   ],
-  "srfc39": "sRFC 39 draft (solana-foundation/SRFCs discussion #4), as of 2026-06-11",
   "title": "A SOL transfer signed with a durable nonce: the signature does not expire"
 }

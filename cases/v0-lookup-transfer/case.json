@@ -1,0 +1,92 @@
+{
+  "class": "ordinary",
+  "context": {},
+  "expected": {
+    "display": {
+      "generator": "@codama/dynamic-instructions 1.0.0 (codama 1.11.0)",
+      "instructions": [
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "Amount",
+                "value": "25"
+              },
+              {
+                "label": "From",
+                "value": "9SwViC9CtEYv2jdXxZQLzPXqruGB2DdrFN199c8fZSzN"
+              },
+              {
+                "label": "Mint",
+                "value": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+              },
+              {
+                "label": "To",
+                "value": "2YiE4woZ6veiQsnVWPZvdSkFuMpf7G6VCjnYJkjC5C5G"
+              },
+              {
+                "label": "Authority",
+                "value": "Ergrx3au6FfTPRqndTByRSMvE43bmmJ8gdEQcpsRJ1Ex"
+              }
+            ],
+            "intent": "Transfer tokens",
+            "interpolatedIntent": "Transfer 25 EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v from 9SwViC9CtEYv2jdXxZQLzPXqruGB2DdrFN199c8fZSzN to 2YiE4woZ6veiQsnVWPZvdSkFuMpf7G6VCjnYJkjC5C5G"
+          },
+          "program": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ]
+    },
+    "displayNext": {
+      "generator": "@codama/dynamic-instructions 2.0.0-rc.0 (codama 2.0.0-rc.0, IDLs upgraded by @codama/upgrade 2.0.0-rc.0)",
+      "instructions": [
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "Amount",
+                "value": "25"
+              },
+              {
+                "label": "From",
+                "value": "9SwViC9CtEYv2jdXxZQLzPXqruGB2DdrFN199c8fZSzN"
+              },
+              {
+                "label": "Mint",
+                "value": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+              },
+              {
+                "label": "To",
+                "value": "2YiE4woZ6veiQsnVWPZvdSkFuMpf7G6VCjnYJkjC5C5G"
+              },
+              {
+                "label": "Authority",
+                "value": "Ergrx3au6FfTPRqndTByRSMvE43bmmJ8gdEQcpsRJ1Ex"
+              }
+            ],
+            "intent": "Transfer tokens",
+            "interpolatedIntent": "Transfer 25 EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v from 9SwViC9CtEYv2jdXxZQLzPXqruGB2DdrFN199c8fZSzN to 2YiE4woZ6veiQsnVWPZvdSkFuMpf7G6VCjnYJkjC5C5G"
+          },
+          "program": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ]
+    },
+    "advisories": []
+  },
+  "id": "v0-lookup-transfer",
+  "idls": [
+    "official/token.json"
+  ],
+  "lookupTables": {
+    "AbrGmDvdnDQ3Qbyu4gUqoJ3mcNRLQUt2ZCdo9E4xibJH": [
+      "HqjsKa6BzjzGiDuBHCVwwjSCjeMv3xyZr3qRZpz1bwk8",
+      "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+      "2YiE4woZ6veiQsnVWPZvdSkFuMpf7G6VCjnYJkjC5C5G",
+      "4sraTebDzpPMHPGcyLHHVpS2gm5vdU4QGVsE7fGQCEjR"
+    ]
+  },
+  "message": "gAEAAQPN4nX8KbQ7Atng1qAYLte/iT7NBGWAK9o6NnhD/CCI0X2CoiI5Ejy1XmphxO7qUM17VDiFPPyqiEe7NUkGNQ0DBt324ddloZPZy+FGzut5rBy0he1fWzeROoz1hX7/AKlolJOy7pRkL6olmk2siF85CGUVje72Apihppdl1A/CeAECBAEEAwAKDEB4fQEAAAAABgGOpqRAiq7J+i5nvdNn/RJvJwsSvBdNbb2TRtD2ia45qgECAQE=",
+  "notes": [
+    "The mint and the destination are not in the message: a signer must be given the lookup table's addresses to show the transfer at all. sRFC 39 does not say where a hardware wallet gets them."
+  ],
+  "title": "A v0 USDC transfer whose mint and destination come from an address lookup table"
+}

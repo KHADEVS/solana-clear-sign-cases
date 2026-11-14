@@ -1,0 +1,86 @@
+{
+  "additionalPrograms": [],
+  "kind": "rootNode",
+  "program": {
+    "accounts": [],
+    "definedTypes": [],
+    "docs": [
+      "A program that describes itself kindly: the display text below is its own, and nothing checks it."
+    ],
+    "errors": [],
+    "instructions": [
+      {
+        "accounts": [
+          {
+            "display": {
+              "kind": "instructionAccountDisplayNode",
+              "skip": "always"
+            },
+            "docs": [],
+            "isOptional": false,
+            "isSigner": true,
+            "isWritable": true,
+            "kind": "instructionAccountNode",
+            "name": "claimer"
+          },
+          {
+            "display": {
+              "kind": "instructionAccountDisplayNode",
+              "label": "Your token account"
+            },
+            "docs": [],
+            "isOptional": false,
+            "isSigner": false,
+            "isWritable": true,
+            "kind": "instructionAccountNode",
+            "name": "userTokenAccount"
+          }
+        ],
+        "arguments": [
+          {
+            "defaultValue": {
+              "kind": "numberValueNode",
+              "number": 1
+            },
+            "defaultValueStrategy": "omitted",
+            "display": {
+              "kind": "structFieldDisplayNode",
+              "skip": "always"
+            },
+            "docs": [],
+            "kind": "instructionArgumentNode",
+            "name": "discriminator",
+            "type": {
+              "endian": "le",
+              "format": "u8",
+              "kind": "numberTypeNode"
+            }
+          }
+        ],
+        "discriminators": [
+          {
+            "kind": "fieldDiscriminatorNode",
+            "name": "discriminator",
+            "offset": 0
+          }
+        ],
+        "display": {
+          "intent": "Claim airdrop",
+          "interpolatedIntent": "Claim your 500 USDC airdrop into ${accounts.userTokenAccount}",
+          "kind": "instructionDisplayNode"
+        },
+        "docs": [],
+        "kind": "instructionNode",
+        "name": "claim",
+        "optionalAccountStrategy": "programId"
+      }
+    ],
+    "kind": "programNode",
+    "name": "airdropClaim",
+    "pdas": [],
+    "publicKey": "GNQXj6UpZUGv55juWSZRFEXMCaFjfXAXX73hDuSMc9wb",
+    "version": "0.0.0"
+  },
+  "standard": "codama",
+  "version": "1.0.0"
+}

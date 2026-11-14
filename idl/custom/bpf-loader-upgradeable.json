@@ -1,0 +1,43 @@
+{
+  "kind": "rootNode",
+  "standard": "codama",
+  "version": "1.0.0",
+  "program": {
+    "kind": "programNode",
+    "name": "bpfLoaderUpgradeable",
+    "publicKey": "BPFLoaderUpgradeab1e11111111111111111111111",
+    "version": "0.0.0",
+    "docs": ["Written for these cases: only SetAuthority (instruction 4), with display metadata."],
+    "accounts": [],
+    "instructions": [
+      {
+        "kind": "instructionNode",
+        "name": "setAuthority",
+        "docs": [],
+        "optionalAccountStrategy": "omitted",
+        "accounts": [
+          { "kind": "instructionAccountNode", "name": "bufferOrProgramData", "isWritable": true, "isSigner": false, "isOptional": false, "docs": [],
+            "display": { "kind": "instructionAccountDisplayNode", "label": "Program data" } },
+          { "kind": "instructionAccountNode", "name": "currentAuthority", "isWritable": false, "isSigner": true, "isOptional": false, "docs": [],
+            "display": { "kind": "instructionAccountDisplayNode", "label": "Current authority" } },
+          { "kind": "instructionAccountNode", "name": "newAuthority", "isWritable": false, "isSigner": false, "isOptional": true, "docs": [],
+            "display": { "kind": "instructionAccountDisplayNode", "label": "New authority" } }
+        ],
+        "arguments": [
+          { "kind": "instructionArgumentNode", "name": "discriminator", "docs": [],
+            "type": { "kind": "numberTypeNode", "format": "u32", "endian": "le" },
+            "defaultValue": { "kind": "numberValueNode", "number": 4 },
+            "defaultValueStrategy": "omitted",
+            "display": { "kind": "structFieldDisplayNode", "skip": "always" } }
+        ],
+        "discriminators": [ { "kind": "fieldDiscriminatorNode", "name": "discriminator", "offset": 0 } ],
+        "display": { "kind": "instructionDisplayNode", "intent": "Set upgrade authority",
+          "interpolatedIntent": "Set the upgrade authority of ${accounts.bufferOrProgramData} to ${accounts.newAuthority}" }
+      }
+    ],
+    "definedTypes": [],
+    "pdas": [],
+    "errors": []
+  },
+  "additionalPrograms": []
+}

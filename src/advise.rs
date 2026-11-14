@@ -1,9 +1,9 @@
 //! Advisories: what a careful wallet flags on top of the sRFC 39 rendering.
 //! Not part of the draft; kept apart so the rendering cases stay normative.
 
+use crate::decode::{decode, Context, Programs};
 use crate::message::Instruction;
-use crate::render::{account_text, render, Context, Programs};
-use crate::util::{anchor_discriminator, find_pda, from_b58, Key};
+use crate::util::{anchor_discriminator, find_pda, from_b58, short, Key};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Advisory {
@@ -45,9 +45,31 @@ fn u64_at(data: &[u8], at: usize) -> Option<u64> {
     Some(u64::from_le_bytes(data.get(at..at + 8)?.try_into().ok()?))
 }
 
-pub fn advise(programs: &Programs, instructions: &[Instruction], ctx: &Context) -> Vec<Advisory> {
+/// `signers`: the message's required signers, fee payer first.
+pub fn advise(
+    programs: &Programs,
+    signers: &[Key],
+    instructions: &[Instruction],
+    ctx: &Context,
+) -> Vec<Advisory> {
     let ids = ids();
     let mut out = Vec::new();
+    if signers.len() > 1 {
+        let others: Vec<String> = signers[1..].iter().map(|k| ctx.name_or_short(k)).collect();
+        out.push(advisory(
+            "co-signed",
+            format!(
+                "valid only once {} also sign{}; whoever holds {} decides when it is sent",
+                others.join(", "),
+                if others.len() == 1 { "s" } else { "" },
+                if others.len() == 1 {
+                    "that signature"
+                } else {
+                    "those signatures"
+                }
+            ),
+        ));
+    }
     if let Some(first) = instructions.first() {
         if first.program == ids.system && u32_le(&first.data) == Some(4) {
             if let Some(nonce) = first.accounts.first() {
@@ -69,15 +91,73 @@ pub fn advise(programs: &Programs, instructions: &[Instruction], ctx: &Context) 
 
 fn advise_one(programs: &Programs, ix: &Instruction, ctx: &Context, ids: &Ids) -> Vec<Advisory> {
     let mut out = Vec::new();
+    if let Ok(Some(decoded)) = decode(programs, ix) {
+        // Metadata a wallet has not vetted can say anything about what an
+        // instruction does: the rendering shows it, the advisory says so.
+        if let Some(trusted) = &ctx.trusted_programs {
+            if !trusted.contains(&ix.program) {
+                out.push(advisory(
+                    "untrusted-metadata",
+                    format!(
+                        "\"{}\" is how program {} describes itself; it is not on this wallet's trusted list, so the text may not match what the instruction does",
+                        decoded.node["display"]["intent"].as_str().unwrap_or("?"),
+                        ctx.name_or_short(&ix.program)
+                    ),
+                ));
+            }
+        }
+        // Accounts the instruction's description does not list: harmless to
+        // the program, but they can change who must sign (trezor-firmware#6843).
+        let declared = decoded.node["accounts"].as_array().map_or(0, Vec::len);
+        let has_remaining = decoded.node["remainingAccounts"]
+            .as_array()
+            .is_some_and(|r| !r.is_empty());
+        if ix.accounts.len() > declared && !has_remaining {
+            let extra: Vec<String> = ix.accounts[declared..]
+                .iter()
+                .map(|k| ctx.name_or_short(k))
+                .collect();
+            out.push(advisory(
+                "extra-accounts",
+                format!(
+                    "\"{}\" also passes {} its description does not list: {}",
+                    decoded.node["display"]["intent"].as_str().unwrap_or("?"),
+                    if extra.len() == 1 {
+                        "an account"
+                    } else {
+                        "accounts"
+                    },
+                    extra.join(", ")
+                ),
+            ));
+        }
+    }
+    // A program the wallet has an IDL for, but no instruction of it matches:
+    // a display shows it as unknown (trezor-firmware#4387, the reverse case).
+    if let (Ok(None), Some(name)) = (decode(programs, ix), programs.name(&ix.program)) {
+        out.push(advisory(
+            "unidentified-instruction",
+            format!(
+                "no instruction in the IDL of {name} matches this data ({}), so a display can only show it as unknown",
+                if ix.data.is_empty() {
+                    "empty".to_string()
+                } else {
+                    ix.data.iter().map(|b| format!("{b:02x}")).collect::<String>()
+                }
+            ),
+        ));
+    }
     let is_token = ix.program == ids.token || ix.program == ids.token_2022;
-    if is_token && ix.data.first() == Some(&4) && u64_at(&ix.data, 1) == Some(u64::MAX) {
+    // u64::MAX, and anything from half of it up: no real balance comes close.
+    let huge = |amount: Option<u64>| amount.is_some_and(|a| a >= 1u64 << 63);
+    if is_token && ix.data.first() == Some(&4) && huge(u64_at(&ix.data, 1)) {
         if let [source, delegate, ..] = ix.accounts[..] {
             out.push(advisory(
                 "unlimited-approval",
                 format!(
-                    "{} may spend every token in {}'s account, now and later, until the approval is revoked",
+                    "{} may spend practically every token in {}'s account, now and later, until the approval is revoked",
                     ctx.name_or_short(&delegate),
-                    account_text(&source, Some(ctx))
+                    ctx.holder(&source)
                 ),
             ));
         }
@@ -85,14 +165,14 @@ fn advise_one(programs: &Programs, ix: &Instruction, ctx: &Context, ids: &Ids) -
     if ix.program == ids.loader && u32_le(&ix.data) == Some(4) {
         if let [program_data, _, ..] = ix.accounts[..] {
             let to = match ix.accounts.get(2) {
-                Some(key) => account_text(key, Some(ctx)),
+                Some(key) => ctx.holder(key),
                 None => "nobody: the program becomes immutable".into(),
             };
             out.push(advisory(
                 "authority-change",
                 format!(
                     "the upgrade authority of {} goes to {to}",
-                    account_text(&program_data, Some(ctx))
+                    ctx.holder(&program_data)
                 ),
             ));
         }
@@ -122,7 +202,7 @@ fn squads_approval(
             "nested-transaction",
             format!(
                 "approves a proposal of {}; what it executes is stored on chain, not in this transaction",
-                account_text(&multisig, Some(ctx))
+                ctx.holder(&multisig)
             ),
         )]
     };
@@ -173,17 +253,16 @@ fn squads_approval(
             )]
         }
     };
-    let what = match render(programs, &inner, Some(ctx)) {
-        Ok(rendered) => rendered
-            .interpolated
-            .unwrap_or_else(|| rendered.fallback.join("; ")),
-        Err(e) => format!("(cannot be read: {e})"),
-    };
+    let what = inner
+        .iter()
+        .map(|ix| describe(programs, ix))
+        .collect::<Vec<_>>()
+        .join("; ");
     let mut out = vec![advisory(
         "nested-transaction",
         format!(
-            "approves transaction {index} of {}, which will: {what}",
-            account_text(&multisig, Some(ctx))
+            "approves transaction {index} of {}, which runs: {what}",
+            ctx.holder(&multisig)
         ),
     )];
     for inner_ix in &inner {
@@ -193,6 +272,24 @@ fn squads_approval(
         }
     }
     out
+}
+
+/// An instruction by its IDL intent, or by its program when no IDL knows it.
+fn describe(programs: &Programs, ix: &Instruction) -> String {
+    match decode(programs, ix) {
+        Ok(Some(d)) => d.node["display"]["intent"]
+            .as_str()
+            .or(d.node["name"].as_str())
+            .unwrap_or("?")
+            .to_string(),
+        _ => format!(
+            "an instruction no IDL here describes, for program {}",
+            programs
+                .name(&ix.program)
+                .map(str::to_string)
+                .unwrap_or_else(|| short(&ix.program))
+        ),
+    }
 }
 
 /// Squads v4 `VaultTransaction` (state/vault_transaction.rs), Borsh-encoded.

@@ -1,14 +1,13 @@
-//! Writes the cases: `cargo run --bin gen`. Messages are rebuilt the same way
-//! every time; expected outputs are written here by hand, never computed by
-//! the renderer they check.
+//! Writes the case inputs: `cargo run --bin gen`. Messages are rebuilt the
+//! same way every time. The expected displays are then filled in by Codama's
+//! own instruction display (`node tools/codama/generate.mjs`); the advisories,
+//! which are ours and not normative, are written here by hand.
 
 use base64::Engine;
-use clear_sign_cases::message::{compile_legacy, AccountMeta, NewInstruction};
+use clear_sign_cases::message::{compile_legacy, compile_v0, AccountMeta, NewInstruction};
 use clear_sign_cases::util::{anchor_discriminator, b58, find_pda, from_b58, short, test_key, Key};
 use serde_json::{json, Value};
 use std::path::{Path, PathBuf};
-
-const SRFC: &str = "sRFC 39 draft (solana-foundation/SRFCs discussion #4), as of 2026-06-11";
 
 fn key(text: &str) -> Key {
     from_b58(text).expect("address")
@@ -34,10 +33,16 @@ fn b64(bytes: &[u8]) -> String {
     base64::engine::general_purpose::STANDARD.encode(bytes)
 }
 
+fn advisory(kind: &str, detail: String) -> Value {
+    json!({ "kind": kind, "detail": detail })
+}
+
 struct Ids {
     system: Key,
     token: Key,
     token_2022: Key,
+    ata: Key,
+    compute_budget: Key,
     loader: Key,
     squads: Key,
     recent_blockhashes: Key,
@@ -50,12 +55,20 @@ fn ids() -> Ids {
         system: key("11111111111111111111111111111111"),
         token: key("TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"),
         token_2022: key("TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"),
+        ata: key("ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"),
+        compute_budget: key("ComputeBudget111111111111111111111111111111"),
         loader: key("BPFLoaderUpgradeab1e11111111111111111111111"),
         squads: key("SQDS4ep65T869zMMBKyuUq6aD6EgTu8psMjkvj52pCf"),
         recent_blockhashes: key("SysvarRecentB1ockHashes11111111111111111111"),
         wsol: key("So11111111111111111111111111111111111111112"),
         usdc: key("EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"),
     }
+}
+
+fn durable_nonce_detail(nonce: &str) -> String {
+    format!(
+        "this signature stays valid until nonce account {nonce} is advanced; a normal signature expires within minutes"
+    )
 }
 
 fn system_transfer(ids: &Ids, from: Key, to: Key, lamports: u64) -> NewInstruction {
@@ -80,8 +93,60 @@ fn advance_nonce(ids: &Ids, nonce: Key, authority: Key) -> NewInstruction {
     }
 }
 
-fn advisory(kind: &str, detail: String) -> Value {
-    json!({ "kind": kind, "detail": detail })
+fn transfer_checked(
+    program: Key,
+    source: Key,
+    mint: Key,
+    destination: Key,
+    owner: Key,
+    amount: u64,
+    decimals: u8,
+) -> NewInstruction {
+    let mut data = vec![12];
+    data.extend(amount.to_le_bytes());
+    data.push(decimals);
+    NewInstruction {
+        program,
+        accounts: vec![
+            account(source, true),
+            account(mint, false),
+            account(destination, true),
+            signer(owner, false),
+        ],
+        data,
+    }
+}
+
+fn approve(ids: &Ids, source: Key, delegate: Key, owner: Key, amount: u64) -> NewInstruction {
+    let mut data = vec![4];
+    data.extend(amount.to_le_bytes());
+    NewInstruction {
+        program: ids.token,
+        accounts: vec![
+            account(source, true),
+            account(delegate, false),
+            signer(owner, false),
+        ],
+        data,
+    }
+}
+
+/// The associated token account of `owner` for `mint` (SPL Token).
+fn ata(ids: &Ids, owner: &Key, mint: &Key) -> Key {
+    find_pda(&[owner, &ids.token, mint], &ids.ata).0
+}
+
+fn base_case(id: &str, title: &str, class: &str, idls: &[&str], message: &[u8]) -> Value {
+    json!({
+        "id": id,
+        "title": title,
+        "class": class,
+        "idls": idls,
+        "message": b64(message),
+        "context": {},
+        "expected": { "advisories": [] },
+        "notes": []
+    })
 }
 
 fn write(root: &Path, case: Value) {
@@ -92,83 +157,47 @@ fn write(root: &Path, case: Value) {
     println!("wrote {}", dir.display());
 }
 
-/// The draft's own example: Token-2022 transferChecked of 10 wSOL to toly.sol.
-fn spec_transfer_checked(ids: &Ids) -> Value {
+fn token_2022_transfer_checked(ids: &Ids) -> Value {
     let alice = test_key("alice");
-    let toly = test_key("toly");
     let alice_wsol = test_key("alice wSOL account");
-    // The token account the draft's example shows, so the output without
-    // metadata can match its "86xCn...o2MMY".
+    // The destination of sRFC 39's own example.
     let toly_wsol = key("86xCnPeV69n6t3DnyGvkKobf9FdN2H9oiVDdaMpo2MMY");
-    let mut data = vec![12];
-    data.extend(10_000_000_000u64.to_le_bytes());
-    data.push(9);
-    let ix = NewInstruction {
-        program: ids.token_2022,
-        accounts: vec![
-            account(alice_wsol, true),
-            account(ids.wsol, false),
-            account(toly_wsol, true),
-            signer(alice, false),
-        ],
-        data,
-    };
-    let message = compile_legacy(alice, &[ix], test_key("blockhash 1"));
-    json!({
-        "id": "spec-transfer-checked",
-        "title": "The draft's own example: Token-2022 transferChecked, 10 wSOL to toly.sol",
-        "class": "ordinary",
-        "srfc39": SRFC,
-        "idls": ["token-2022.json"],
-        "message": b64(&message),
-        "context": {
-            "names": { b58(&toly): "toly.sol" },
-            "tokens": { b58(&ids.wsol): { "symbol": "wSOL", "decimals": 9 } },
-            "tokenAccounts": {
-                b58(&toly_wsol): { "owner": b58(&toly), "mint": b58(&ids.wsol) },
-                b58(&alice_wsol): { "owner": b58(&alice), "mint": b58(&ids.wsol) }
-            }
-        },
-        "expected": {
-            "interpolated": "Transfer 10 wSOL to toly.sol",
-            "fallback": ["Transfer", "To: toly.sol", "Amount: 10 wSOL"],
-            "fallbackWithoutMetadata": ["Transfer", "Token Mint: So111...11112", "To: 86xCn...o2MMY", "Amount: 10"],
-            "advisories": []
-        },
-        "notes": [
-            "The draft's expected text ends with a period (\"Transfer 10 wSOL to toly.sol.\") that its template (\"Transfer {amount} to {destination}\") does not have. This case expects the template as written, with no period added.",
-            "{destination} names the token account, but the draft's expected text shows its owner (toly.sol); its Interpolation section writes the same intent as {destination.owner}. This case shows a token account as its owner when the owner is known, as the example does; the draft's last open question asks whether that should be the rule.",
-            "The mint's label is \"Token Mint\" in the IDL, but the draft's output without metadata reads \"Token: So111...11112\". This case uses the label, as the accountDisplayNode definition says.",
-            "skip \"withAdditionalMetadata\" is defined as \"SHOULD NOT display the account unless additional metadata is available\", yet the example shows the mint only when metadata is missing. This case follows the example: hidden when metadata is available.",
-            "amountFormatterNode's \"decimals\" is defined as a number of decimal places, while the example passes the name of an argument (\"decimals\": \"decimals\") and \"token\" names an account. This case reads both as references, as the example does."
-        ]
-    })
+    let ix = transfer_checked(
+        ids.token_2022,
+        alice_wsol,
+        ids.wsol,
+        toly_wsol,
+        alice,
+        10_000_000_000,
+        9,
+    );
+    let mut case = base_case(
+        "token-2022-transfer-checked",
+        "Token-2022 transferChecked of 10 wrapped SOL, the transfer of sRFC 39's own example",
+        "ordinary",
+        &["official/token-2022.json"],
+        &compile_legacy(alice, &[ix], test_key("blockhash 1")),
+    );
+    case["notes"] = json!([
+        "The official IDL shows the mint as an address and takes the decimals from the instruction itself: names and symbols are left to the wallet."
+    ]);
+    case
 }
 
 fn system_transfer_case(ids: &Ids) -> Value {
     let alice = test_key("alice");
     let bob = test_key("bob");
-    let message = compile_legacy(
-        alice,
-        &[system_transfer(ids, alice, bob, 1_500_000_000)],
-        test_key("blockhash 2"),
-    );
-    json!({
-        "id": "system-transfer",
-        "title": "A plain SOL transfer to a named address",
-        "class": "ordinary",
-        "srfc39": SRFC,
-        "idls": ["system.json"],
-        "message": b64(&message),
-        "context": { "names": { b58(&bob): "bob.sol" } },
-        "expected": {
-            "interpolated": "Transfer 1.5 SOL to bob.sol",
-            "fallback": ["Transfer SOL", "To: bob.sol", "Amount: 1.5 SOL"],
-            "fallbackWithoutMetadata": ["Transfer SOL", format!("To: {}", short(&bob)), "Amount: 1.5 SOL"],
-            "advisories": []
-        },
-        "notes": ["isNative needs no metadata: the amount keeps its unit when nothing else is known."]
-    })
+    base_case(
+        "system-transfer",
+        "A plain SOL transfer",
+        "ordinary",
+        &["official/system.json"],
+        &compile_legacy(
+            alice,
+            &[system_transfer(ids, alice, bob, 1_500_000_000)],
+            test_key("blockhash 2"),
+        ),
+    )
 }
 
 fn durable_nonce_transfer(ids: &Ids) -> Value {
@@ -179,82 +208,161 @@ fn durable_nonce_transfer(ids: &Ids) -> Value {
         advance_nonce(ids, nonce, alice),
         system_transfer(ids, alice, eve, 1_500_000_000),
     ];
-    let message = compile_legacy(alice, &ixs, test_key("stored nonce value"));
-    json!({
-        "id": "durable-nonce-transfer",
-        "title": "A SOL transfer signed with a durable nonce: the signature does not expire",
-        "class": "adversarial",
-        "srfc39": SRFC,
-        "idls": ["system.json"],
-        "message": b64(&message),
-        "context": { "names": { b58(&alice): "alice.sol" } },
-        "expected": {
-            "interpolated": format!("Advance durable nonce {} and Transfer 1.5 SOL to {}", short(&nonce), short(&eve)),
-            "fallback": [
-                "Advance durable nonce", format!("Nonce account: {}", short(&nonce)), "Nonce authority: alice.sol",
-                "Transfer SOL", format!("To: {}", short(&eve)), "Amount: 1.5 SOL"
-            ],
-            "fallbackWithoutMetadata": [
-                "Advance durable nonce", format!("Nonce account: {}", short(&nonce)), format!("Nonce authority: {}", short(&alice)),
-                "Transfer SOL", format!("To: {}", short(&eve)), "Amount: 1.5 SOL"
-            ],
-            "advisories": [advisory("durable-nonce", format!(
-                "this signature stays valid until nonce account {} is advanced; a normal signature expires within minutes",
-                short(&nonce)
-            ))]
-        },
-        "notes": ["The rendering says nothing about how long the signature stays valid; only the advisory does. SIMD discussion #513 proposes an explicit warning."]
-    })
+    let mut case = base_case(
+        "durable-nonce-transfer",
+        "A SOL transfer signed with a durable nonce: the signature does not expire",
+        "adversarial",
+        &["official/system.json"],
+        &compile_legacy(alice, &ixs, test_key("stored nonce value")),
+    );
+    case["expected"]["advisories"] = json!([advisory(
+        "durable-nonce",
+        durable_nonce_detail(&short(&nonce))
+    )]);
+    case["notes"] = json!([
+        "The display names the nonce account but says nothing about how long the signature stays valid; SIMD discussion #513 proposes an explicit warning, and SIMD-0723 proposes removing durable nonces."
+    ]);
+    case
 }
 
-fn unlimited_approve(ids: &Ids) -> Value {
+fn approval_case(ids: &Ids, id: &str, title: &str, amount: u64, note: &str) -> Value {
     let alice = test_key("alice");
-    let alice_usdc = test_key("alice USDC account");
-    let drainer = test_key("unknown delegate");
-    let mut data = vec![4];
-    data.extend(u64::MAX.to_le_bytes());
-    let ix = NewInstruction {
-        program: ids.token,
+    let alice_usdc = ata(ids, &alice, &ids.usdc);
+    let delegate = test_key("unknown delegate");
+    let mut case = base_case(
+        id,
+        title,
+        "adversarial",
+        &["official/token.json"],
+        &compile_legacy(
+            alice,
+            &[approve(ids, alice_usdc, delegate, alice, amount)],
+            test_key("blockhash 4"),
+        ),
+    );
+    case["context"] = json!({
+        "names": { b58(&alice): "alice.sol" },
+        "tokenAccounts": { b58(&alice_usdc): { "owner": b58(&alice), "mint": b58(&ids.usdc) } }
+    });
+    case["expected"]["advisories"] = json!([advisory(
+        "unlimited-approval",
+        format!(
+            "{} may spend practically every token in alice.sol's account, now and later, until the approval is revoked",
+            short(&delegate)
+        )
+    )]);
+    case["notes"] = json!([note]);
+    case
+}
+
+/// The real Mainnet message of trezor-firmware#6843.
+fn trezor_6843(root: &Path) -> Value {
+    let hex =
+        std::fs::read_to_string(root.join("real/trezor-firmware-6843.hex")).expect("real message");
+    let hex = hex.trim();
+    let bytes: Vec<u8> = (0..hex.len())
+        .step_by(2)
+        .map(|i| u8::from_str_radix(&hex[i..i + 2], 16).expect("hex"))
+        .collect();
+    let co_signer = key("trfb53BmkHNeoqaa3REgqnrbwUZqAFYdjTkivkJ6aWg");
+    let mut case = base_case(
+        "trezor-6843-co-signed-transfer",
+        "A real Mainnet message: a SOL transfer that lists an extra signer, so the app co-signs and decides when it is sent",
+        "adversarial",
+        &[
+            "official/compute-budget.json",
+            "official/associated-token-account.json",
+            "official/system.json",
+            "official/token.json",
+        ],
+        &bytes,
+    );
+    case["expected"]["advisories"] = json!([
+        advisory(
+            "co-signed",
+            format!(
+                "valid only once {} also signs; whoever holds that signature decides when it is sent",
+                short(&co_signer)
+            )
+        ),
+        advisory(
+            "extra-accounts",
+            format!(
+                "\"Transfer SOL\" also passes an account its description does not list: {}",
+                short(&co_signer)
+            )
+        )
+    ]);
+    case["notes"] = json!([
+        "Posted in trezor-firmware#6843 (2026-04-28): an app adds its own signer to a transfer so that it alone decides when the transaction is sent. Trezor's firmware refused it until #6992 (2026-05-26). It stays here as a regression case.",
+        "Codama's stable display (@codama/dynamic-instructions 1.0.0) does not show the extra signer at all; the 2.0 release candidate lists it as a \"Remaining Account\" in the fallback fields (codama#1255). Neither interpolated sentence mentions it.",
+        "Seven instructions, five of them setup: the sentence a wallet builds by joining the interpolated intents is long, the concern Trezor and Ledger raised in the sRFC 39 discussion."
+    ]);
+    case
+}
+
+fn ata_create_forms(ids: &Ids) -> Value {
+    let alice = test_key("alice");
+    let bob = test_key("bob");
+    let carol = test_key("carol");
+    let create = |owner: Key, data: Vec<u8>| NewInstruction {
+        program: ids.ata,
         accounts: vec![
-            account(alice_usdc, true),
-            account(drainer, false),
-            signer(alice, false),
+            signer(alice, true),
+            account(ata(ids, &owner, &ids.usdc), true),
+            account(owner, false),
+            account(ids.usdc, false),
+            account(ids.system, false),
+            account(ids.token, false),
         ],
         data,
     };
-    let message = compile_legacy(alice, &[ix], test_key("blockhash 4"));
-    json!({
-        "id": "unlimited-approve",
-        "title": "An SPL Token approval of u64::MAX to an unknown delegate",
-        "class": "adversarial",
-        "srfc39": SRFC,
-        "idls": ["spl-token.json"],
-        "message": b64(&message),
-        "context": {
-            "names": { b58(&alice): "alice.sol" },
-            "tokens": { b58(&ids.usdc): { "symbol": "USDC", "decimals": 6 } },
-            "tokenAccounts": { b58(&alice_usdc): { "owner": b58(&alice), "mint": b58(&ids.usdc) } }
-        },
-        "expected": {
-            "interpolated": format!("Allow {} to spend 18446744073709.551615 USDC from alice.sol", short(&drainer)),
-            "fallback": [
-                "Approve a delegate", "From: alice.sol", format!("Delegate: {}", short(&drainer)),
-                "Amount: 18446744073709.551615 USDC"
-            ],
-            "fallbackWithoutMetadata": [
-                "Approve a delegate", format!("From: {}", short(&alice_usdc)), format!("Delegate: {}", short(&drainer)),
-                "Amount: 18446744073709551615"
-            ],
-            "advisories": [advisory("unlimited-approval", format!(
-                "{} may spend every token in alice.sol's account, now and later, until the approval is revoked",
-                short(&drainer)
-            ))]
-        },
-        "notes": [
-            "The draft has no way to say that u64::MAX means unlimited, so the rendering shows the raw maximum; Ledger proposed maxThreshold and maxLabel for this.",
-            "approve carries no mint: the formatter's \"token\" names the source token account, read through its mint when metadata is available."
-        ]
-    })
+    let ixs = [create(bob, vec![0]), create(carol, vec![])];
+    let mut case = base_case(
+        "ata-create-both-forms",
+        "Create associated token accounts with data [0] and with empty data, both of which the program reads as Create",
+        "ordinary",
+        &["official/associated-token-account.json"],
+        &compile_legacy(alice, &ixs, test_key("blockhash 7")),
+    );
+    case["expected"]["advisories"] = json!([advisory(
+        "unidentified-instruction",
+        "no instruction in the IDL of associatedTokenAccount matches this data (empty), so a display can only show it as unknown".into()
+    )]);
+    case["notes"] = json!([
+        "The Associated Token Account program reads both empty data and [0] as Create. The official IDL matches [0] only, so the empty form is unknown to Codama's display; Trezor's firmware has the reverse gap, the empty form only (trezor-firmware#4387, open)."
+    ]);
+    case
+}
+
+fn v0_lookup_transfer(ids: &Ids) -> Value {
+    let alice = test_key("alice");
+    let bob = test_key("bob");
+    let alice_usdc = ata(ids, &alice, &ids.usdc);
+    let bob_usdc = ata(ids, &bob, &ids.usdc);
+    let table = test_key("lookup table");
+    let table_keys = [
+        test_key("table entry 0"),
+        ids.usdc,
+        bob_usdc,
+        test_key("table entry 3"),
+    ];
+    let ix = transfer_checked(
+        ids.token, alice_usdc, ids.usdc, bob_usdc, alice, 25_000_000, 6,
+    );
+    let message = compile_v0(alice, &[ix], test_key("blockhash 8"), (table, &table_keys));
+    let mut case = base_case(
+        "v0-lookup-transfer",
+        "A v0 USDC transfer whose mint and destination come from an address lookup table",
+        "ordinary",
+        &["official/token.json"],
+        &message,
+    );
+    case["lookupTables"] = json!({ b58(&table): table_keys.iter().map(b58).collect::<Vec<_>>() });
+    case["notes"] = json!([
+        "The mint and the destination are not in the message: a signer must be given the lookup table's addresses to show the transfer at all. sRFC 39 does not say where a hardware wallet gets them."
+    ]);
+    case
 }
 
 /// Modeled on the Drift exploit: a council member pre-signs, with a durable
@@ -289,7 +397,6 @@ fn squads_nested_approval(ids: &Ids) -> Value {
     for _ in 0..3 {
         proposal_data.extend(0u32.to_le_bytes());
     }
-
     // VaultTransaction { multisig, creator, index, bump, vault_index, vault_bump, ephemeral_signer_bumps, message }
     let mut transaction_data = anchor_discriminator("account", "VaultTransaction").to_vec();
     transaction_data.extend(multisig);
@@ -299,8 +406,8 @@ fn squads_nested_approval(ids: &Ids) -> Value {
     transaction_data.extend(0u32.to_le_bytes());
     transaction_data.extend([1, 0, 1]); // one signer (the vault), read-only; one writable non-signer
     transaction_data.extend(4u32.to_le_bytes());
-    for key in [vault, program_data, new_authority, ids.loader] {
-        transaction_data.extend(key);
+    for k in [vault, program_data, new_authority, ids.loader] {
+        transaction_data.extend(k);
     }
     transaction_data.extend(1u32.to_le_bytes());
     transaction_data.push(3); // the loader
@@ -321,73 +428,162 @@ fn squads_nested_approval(ids: &Ids) -> Value {
         ],
         data: approve_data,
     };
-    let message = compile_legacy(
-        member,
-        &[advance_nonce(ids, nonce, member), approve],
-        test_key("council stored nonce"),
-    );
     let council = "Protocol council (2 of 5)";
-    json!({
-        "id": "squads-nested-approval",
-        "title": "A durable-nonce approval of a Squads proposal that hands over a program's upgrade authority",
-        "class": "adversarial",
-        "srfc39": SRFC,
-        "idls": ["system.json", "squads-v4.json", "bpf-loader-upgradeable.json"],
-        "message": b64(&message),
-        "context": {
-            "names": {
-                b58(&multisig): council,
-                b58(&member): "council member 2",
-                b58(&program_data): "Protocol program"
-            },
-            "accounts": {
-                b58(&proposal): b64(&proposal_data),
-                b58(&transaction): b64(&transaction_data)
-            }
+    let mut case = base_case(
+        "squads-nested-approval",
+        "A durable-nonce approval of a Squads proposal whose transaction hands over a program's upgrade authority",
+        "adversarial",
+        &[
+            "official/system.json",
+            "custom/squads-v4.json",
+            "custom/bpf-loader-upgradeable.json",
+        ],
+        &compile_legacy(member, &[advance_nonce(ids, nonce, member), approve], test_key("council stored nonce")),
+    );
+    case["context"] = json!({
+        "names": { b58(&multisig): council, b58(&member): "council member 2", b58(&program_data): "Protocol program" },
+        "accounts": {
+            b58(&proposal): { "data": b64(&proposal_data), "owner": b58(&ids.squads) },
+            b58(&transaction): { "data": b64(&transaction_data), "owner": b58(&ids.squads) }
+        }
+    });
+    case["expected"]["advisories"] = json!([
+        advisory("durable-nonce", durable_nonce_detail(&short(&nonce))),
+        advisory(
+            "nested-transaction",
+            format!("approves transaction 7 of {council}, which runs: Set upgrade authority")
+        ),
+        advisory(
+            "authority-change",
+            format!(
+                "inside transaction 7: the upgrade authority of Protocol program goes to {}",
+                short(&new_authority)
+            )
+        )
+    ]);
+    case["notes"] = json!([
+        "Modeled on the Drift exploit of April 1, 2026: an approval pre-signed with a durable nonce. Here the proposal's transaction changes a program's upgrade authority.",
+        "What the proposal executes is stored in the VaultTransaction account, which the approval does not even reference: no display of this instruction alone can show it. Ledger asked for account-data formatters for Squads in the sRFC 39 discussion. The advisories decode it from the account data in the context, after checking the proposal and transaction addresses against their seeds.",
+        "custom/squads-v4.json and custom/bpf-loader-upgradeable.json are written for these cases, in the official IDLs' format."
+    ]);
+    case
+}
+
+fn lying_metadata(ids: &Ids, root: &Path) -> Value {
+    let alice = test_key("alice");
+    let alice_usdc = ata(ids, &alice, &ids.usdc);
+    let program = test_key("airdrop program");
+    let idl = json!({
+        "kind": "rootNode", "standard": "codama", "version": "1.0.0",
+        "program": {
+            "kind": "programNode", "name": "airdropClaim", "publicKey": b58(&program), "version": "0.0.0",
+            "docs": ["A program that describes itself kindly: the display text below is its own, and nothing checks it."],
+            "accounts": [], "definedTypes": [], "pdas": [], "errors": [],
+            "instructions": [{
+                "kind": "instructionNode", "name": "claim", "docs": [], "optionalAccountStrategy": "programId",
+                "accounts": [
+                    { "kind": "instructionAccountNode", "name": "claimer", "isWritable": true, "isSigner": true, "isOptional": false, "docs": [],
+                      "display": { "kind": "instructionAccountDisplayNode", "skip": "always" } },
+                    { "kind": "instructionAccountNode", "name": "userTokenAccount", "isWritable": true, "isSigner": false, "isOptional": false, "docs": [],
+                      "display": { "kind": "instructionAccountDisplayNode", "label": "Your token account" } }
+                ],
+                "arguments": [
+                    { "kind": "instructionArgumentNode", "name": "discriminator", "docs": [],
+                      "type": { "kind": "numberTypeNode", "format": "u8", "endian": "le" },
+                      "defaultValue": { "kind": "numberValueNode", "number": 1 }, "defaultValueStrategy": "omitted",
+                      "display": { "kind": "structFieldDisplayNode", "skip": "always" } }
+                ],
+                "discriminators": [ { "kind": "fieldDiscriminatorNode", "name": "discriminator", "offset": 0 } ],
+                "display": { "kind": "instructionDisplayNode", "intent": "Claim airdrop",
+                    "interpolatedIntent": "Claim your 500 USDC airdrop into ${accounts.userTokenAccount}" }
+            }]
         },
-        "expected": {
-            "interpolated": format!("Advance durable nonce {} and Approve proposal {} of {council}", short(&nonce), short(&proposal)),
-            "fallback": [
-                "Advance durable nonce", format!("Nonce account: {}", short(&nonce)), "Nonce authority: council member 2",
-                "Approve a multisig proposal", format!("Multisig: {council}"), format!("Proposal: {}", short(&proposal)), "Memo: none"
-            ],
-            "fallbackWithoutMetadata": [
-                "Advance durable nonce", format!("Nonce account: {}", short(&nonce)), format!("Nonce authority: {}", short(&member)),
-                "Approve a multisig proposal", format!("Multisig: {}", short(&multisig)), format!("Proposal: {}", short(&proposal)), "Memo: none"
-            ],
-            "advisories": [
-                advisory("durable-nonce", format!(
-                    "this signature stays valid until nonce account {} is advanced; a normal signature expires within minutes",
-                    short(&nonce)
-                )),
-                advisory("nested-transaction", format!(
-                    "approves transaction 7 of {council}, which will: Change the upgrade authority of Protocol program to {}",
-                    short(&new_authority)
-                )),
-                advisory("authority-change", format!(
-                    "inside transaction 7: the upgrade authority of Protocol program goes to {}",
-                    short(&new_authority)
-                ))
-            ]
-        },
-        "notes": [
-            "Modeled on the Drift exploit of April 1, 2026: an approval pre-signed with a durable nonce. Here the proposal's transaction changes a program's upgrade authority.",
-            "The rendering cannot say what the proposal executes: it is stored in the VaultTransaction account, which this instruction does not even reference. Ledger asked for account-data formatters for Squads; until the draft has them, only the advisories can show it. They decode it from the account data in the context, after checking the proposal and transaction addresses against their seeds.",
-            "The draft does not say how to show an absent optional value (the memo); \"none\" here."
-        ]
-    })
+        "additionalPrograms": []
+    });
+    let path = root.join("idl/custom/airdrop-claim.json");
+    std::fs::write(
+        &path,
+        serde_json::to_string_pretty(&idl).expect("json") + "\n",
+    )
+    .expect("idl");
+    let ix = NewInstruction {
+        program,
+        accounts: vec![signer(alice, true), account(alice_usdc, true)],
+        data: vec![1],
+    };
+    let mut case = base_case(
+        "lying-metadata",
+        "A program whose own IDL describes an instruction as an airdrop claim",
+        "adversarial",
+        &["custom/airdrop-claim.json"],
+        &compile_legacy(alice, &[ix], test_key("blockhash 10")),
+    );
+    let trusted: Vec<String> = [
+        ids.system,
+        ids.token,
+        ids.token_2022,
+        ids.ata,
+        ids.compute_budget,
+    ]
+    .iter()
+    .map(b58)
+    .collect();
+    case["context"] = json!({ "trustedPrograms": trusted });
+    case["expected"]["advisories"] = json!([advisory(
+        "untrusted-metadata",
+        format!(
+            "\"Claim airdrop\" is how program {} describes itself; it is not on this wallet's trusted list, so the text may not match what the instruction does",
+            short(&program)
+        )
+    )]);
+    case["notes"] = json!([
+        "No display can tell that this text is false: the program's own IDL says it. What can be checked is where the metadata comes from: the sRFC 39 discussion asks for curated lists of trusted programs, VisualSign checks IDL signatures against a curator allowlist, and the advisory uses such a list."
+    ]);
+    case
 }
 
 fn main() {
     let root = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     let ids = ids();
-    for case in [
-        spec_transfer_checked(&ids),
+    let cases = [
+        token_2022_transfer_checked(&ids),
         system_transfer_case(&ids),
         durable_nonce_transfer(&ids),
-        unlimited_approve(&ids),
+        approval_case(
+            &ids,
+            "unlimited-approve",
+            "An SPL Token approval of u64::MAX to an unknown delegate",
+            u64::MAX,
+            "approve carries no mint, so the official IDL shows the amount in base units; Ledger proposed maxThreshold in the sRFC 39 discussion so that u64::MAX reads as unlimited.",
+        ),
+        approval_case(
+            &ids,
+            "near-max-approve",
+            "An SPL Token approval just under u64::MAX",
+            0xFEFF_FFFF_FFFF_FFFF,
+            "Not u64::MAX, so a check for the exact maximum misses it; the advisory flags any approval from 2^63 up.",
+        ),
+        trezor_6843(&root),
+        ata_create_forms(&ids),
+        v0_lookup_transfer(&ids),
         squads_nested_approval(&ids),
-    ] {
+        lying_metadata(&ids, &root),
+    ];
+    let keep: Vec<String> = cases
+        .iter()
+        .map(|c| c["id"].as_str().expect("id").to_string())
+        .collect();
+    for entry in std::fs::read_dir(root.join("cases"))
+        .into_iter()
+        .flatten()
+        .flatten()
+    {
+        let name = entry.file_name().to_string_lossy().to_string();
+        if entry.path().join("case.json").exists() && !keep.contains(&name) {
+            println!("stale case directory, not generated any more: cases/{name}");
+        }
+    }
+    for case in cases {
         write(&root, case);
     }
 }

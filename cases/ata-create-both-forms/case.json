@@ -1,0 +1,97 @@
+{
+  "class": "ordinary",
+  "context": {},
+  "expected": {
+    "display": {
+      "generator": "@codama/dynamic-instructions 1.0.0 (codama 1.11.0)",
+      "instructions": [
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "Funder",
+                "value": "Ergrx3au6FfTPRqndTByRSMvE43bmmJ8gdEQcpsRJ1Ex"
+              },
+              {
+                "label": "Token Account",
+                "value": "2YiE4woZ6veiQsnVWPZvdSkFuMpf7G6VCjnYJkjC5C5G"
+              },
+              {
+                "label": "Wallet",
+                "value": "5iQ9nmZMNNPL8W5dgR9Dm6KrhWAKeLCsuDV16xGXpUVb"
+              },
+              {
+                "label": "Mint",
+                "value": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+              },
+              {
+                "label": "Token Program",
+                "value": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+              }
+            ],
+            "intent": "Create associated token account",
+            "interpolatedIntent": "Create the associated token account of 5iQ9nmZMNNPL8W5dgR9Dm6KrhWAKeLCsuDV16xGXpUVb for mint EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+          },
+          "program": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "display": null,
+          "program": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        }
+      ]
+    },
+    "displayNext": {
+      "generator": "@codama/dynamic-instructions 2.0.0-rc.0 (codama 2.0.0-rc.0, IDLs upgraded by @codama/upgrade 2.0.0-rc.0)",
+      "instructions": [
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "Funder",
+                "value": "Ergrx3au6FfTPRqndTByRSMvE43bmmJ8gdEQcpsRJ1Ex"
+              },
+              {
+                "label": "Token Account",
+                "value": "2YiE4woZ6veiQsnVWPZvdSkFuMpf7G6VCjnYJkjC5C5G"
+              },
+              {
+                "label": "Wallet",
+                "value": "5iQ9nmZMNNPL8W5dgR9Dm6KrhWAKeLCsuDV16xGXpUVb"
+              },
+              {
+                "label": "Mint",
+                "value": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+              },
+              {
+                "label": "Token Program",
+                "value": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+              }
+            ],
+            "intent": "Create associated token account",
+            "interpolatedIntent": "Create the associated token account of 5iQ9nmZMNNPL8W5dgR9Dm6KrhWAKeLCsuDV16xGXpUVb for mint EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+          },
+          "program": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "display": null,
+          "program": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        }
+      ]
+    },
+    "advisories": [
+      {
+        "detail": "no instruction in the IDL of associatedTokenAccount matches this data (empty), so a display can only show it as unknown",
+        "kind": "unidentified-instruction"
+      }
+    ]
+  },
+  "id": "ata-create-both-forms",
+  "idls": [
+    "official/associated-token-account.json"
+  ],
+  "message": "AQAGCc3idfwptDsC2eDWoBgu17+JPs0EZYAr2jo2eEP8IIjRFvtOPMigj/yIzJatoqpkx42+Gtggkl2PMxPgsi4nplNB78zywopSEF9tUy96VFUciGOZ/CbRseK5nlZAZ51yUUYJvQf77gsW7y322bsuLDwREHX9Apdbc7rbo0aIzrcexvp6877brTo9ZfNqq8l0MbG75MLS9uDkfKYCA0UvXWEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAbd9uHXZaGT2cvhRs7reawctIXtX1s3kTqM9YV+/wCpjJclj04kifG7PRApFI4NgwtaE5na/xCEBI572Nvp+FkXom3frQts/Mh4yGWf9SP+8siW6aeMLgJ+9EKwvmU3Zt75rZz7pXH+T9DQHWnpAzh8neg8wJ0jfRHLVTzixjjaAgcGAAEDBAUGAQAHBgACCAQFBgA=",
+  "notes": [
+    "The Associated Token Account program reads both empty data and [0] as Create. The official IDL matches [0] only, so the empty form is unknown to Codama's display; Trezor's firmware has the reverse gap, the empty form only (trezor-firmware#4387, open)."
+  ],
+  "title": "Create associated token accounts with data [0] and with empty data, both of which the program reads as Create"
+}

@@ -1,0 +1,50 @@
+{
+  "kind": "rootNode",
+  "standard": "codama",
+  "version": "1.0.0",
+  "program": {
+    "kind": "programNode",
+    "name": "squadsMultisigProgram",
+    "publicKey": "SQDS4ep65T869zMMBKyuUq6aD6EgTu8psMjkvj52pCf",
+    "version": "0.0.0",
+    "docs": ["Written for these cases: only proposalApprove, from Squads-Protocol/v4 (instructions/proposal_vote.rs), with display metadata as a protocol could publish it."],
+    "accounts": [],
+    "instructions": [
+      {
+        "kind": "instructionNode",
+        "name": "proposalApprove",
+        "docs": [],
+        "optionalAccountStrategy": "programId",
+        "accounts": [
+          { "kind": "instructionAccountNode", "name": "multisig", "isWritable": false, "isSigner": false, "isOptional": false, "docs": [],
+            "display": { "kind": "instructionAccountDisplayNode", "label": "Multisig" } },
+          { "kind": "instructionAccountNode", "name": "member", "isWritable": true, "isSigner": true, "isOptional": false, "docs": [],
+            "display": { "kind": "instructionAccountDisplayNode", "label": "Member" } },
+          { "kind": "instructionAccountNode", "name": "proposal", "isWritable": true, "isSigner": false, "isOptional": false, "docs": [],
+            "display": { "kind": "instructionAccountDisplayNode", "label": "Proposal" } }
+        ],
+        "arguments": [
+          { "kind": "instructionArgumentNode", "name": "discriminator", "docs": [],
+            "type": { "kind": "fixedSizeTypeNode", "size": 8, "type": { "kind": "bytesTypeNode" } },
+            "defaultValue": { "kind": "bytesValueNode", "encoding": "base16", "data": "9025a488bcd82af8" },
+            "defaultValueStrategy": "omitted",
+            "display": { "kind": "structFieldDisplayNode", "skip": "always" } },
+          { "kind": "instructionArgumentNode", "name": "memo", "docs": [],
+            "type": { "kind": "optionTypeNode", "fixed": false,
+              "prefix": { "kind": "numberTypeNode", "format": "u8", "endian": "le" },
+              "item": { "kind": "sizePrefixTypeNode",
+                "prefix": { "kind": "numberTypeNode", "format": "u32", "endian": "le" },
+                "type": { "kind": "stringTypeNode", "encoding": "utf8" } } },
+            "display": { "kind": "structFieldDisplayNode", "label": "Memo" } }
+        ],
+        "discriminators": [ { "kind": "fieldDiscriminatorNode", "name": "discriminator", "offset": 0 } ],
+        "display": { "kind": "instructionDisplayNode", "intent": "Approve proposal",
+          "interpolatedIntent": "Approve proposal ${accounts.proposal} of multisig ${accounts.multisig}" }
+      }
+    ],
+    "definedTypes": [],
+    "pdas": [],
+    "errors": []
+  },
+  "additionalPrograms": []
+}

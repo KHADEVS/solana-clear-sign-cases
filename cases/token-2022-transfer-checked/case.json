@@ -1,0 +1,84 @@
+{
+  "class": "ordinary",
+  "context": {},
+  "expected": {
+    "display": {
+      "generator": "@codama/dynamic-instructions 1.0.0 (codama 1.11.0)",
+      "instructions": [
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "Amount",
+                "value": "10"
+              },
+              {
+                "label": "From",
+                "value": "58w4nw2XFcwhY5kcUqUbgLpEBNg9npQPwnN3PWrCTA9r"
+              },
+              {
+                "label": "Mint",
+                "value": "So11111111111111111111111111111111111111112"
+              },
+              {
+                "label": "To",
+                "value": "86xCnPeV69n6t3DnyGvkKobf9FdN2H9oiVDdaMpo2MMY"
+              },
+              {
+                "label": "Authority",
+                "value": "Ergrx3au6FfTPRqndTByRSMvE43bmmJ8gdEQcpsRJ1Ex"
+              }
+            ],
+            "intent": "Transfer tokens",
+            "interpolatedIntent": "Transfer 10 So11111111111111111111111111111111111111112 from 58w4nw2XFcwhY5kcUqUbgLpEBNg9npQPwnN3PWrCTA9r to 86xCnPeV69n6t3DnyGvkKobf9FdN2H9oiVDdaMpo2MMY"
+          },
+          "program": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        }
+      ]
+    },
+    "displayNext": {
+      "generator": "@codama/dynamic-instructions 2.0.0-rc.0 (codama 2.0.0-rc.0, IDLs upgraded by @codama/upgrade 2.0.0-rc.0)",
+      "instructions": [
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "Amount",
+                "value": "10"
+              },
+              {
+                "label": "From",
+                "value": "58w4nw2XFcwhY5kcUqUbgLpEBNg9npQPwnN3PWrCTA9r"
+              },
+              {
+                "label": "Mint",
+                "value": "So11111111111111111111111111111111111111112"
+              },
+              {
+                "label": "To",
+                "value": "86xCnPeV69n6t3DnyGvkKobf9FdN2H9oiVDdaMpo2MMY"
+              },
+              {
+                "label": "Authority",
+                "value": "Ergrx3au6FfTPRqndTByRSMvE43bmmJ8gdEQcpsRJ1Ex"
+              }
+            ],
+            "intent": "Transfer tokens",
+            "interpolatedIntent": "Transfer 10 So11111111111111111111111111111111111111112 from 58w4nw2XFcwhY5kcUqUbgLpEBNg9npQPwnN3PWrCTA9r to 86xCnPeV69n6t3DnyGvkKobf9FdN2H9oiVDdaMpo2MMY"
+          },
+          "program": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        }
+      ]
+    },
+    "advisories": []
+  },
+  "id": "token-2022-transfer-checked",
+  "idls": [
+    "official/token-2022.json"
+  ],
+  "message": "AQACBc3idfwptDsC2eDWoBgu17+JPs0EZYAr2jo2eEP8IIjRPXbx/k8TsN/99chDx9jAiCbYsUcpPjwUfHD3a4H2F+VpiCGEh0llPHXQQQqVjDAJohMPnDHj34n/YcLXUqQCXwabiFf+q4GE+2h/Y0YYwDXaxDncGus7VZig8AAAAAABBt324e51j94YQl285GzN2rYa/E2DuQ0n/r35KNihi/zN4RYCG4ggTEI6TVuE+xERDXtX5m8T+PY0k3WE2k6oOgEEBAEDAgAKDADkC1QCAAAACQ==",
+  "notes": [
+    "The official IDL shows the mint as an address and takes the decimals from the instruction itself: names and symbols are left to the wallet."
+  ],
+  "title": "Token-2022 transferChecked of 10 wrapped SOL, the transfer of sRFC 39's own example"
+}

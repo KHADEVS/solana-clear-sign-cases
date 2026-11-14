@@ -1,0 +1,338 @@
+{
+  "class": "adversarial",
+  "context": {},
+  "expected": {
+    "display": {
+      "generator": "@codama/dynamic-instructions 1.0.0 (codama 1.11.0)",
+      "instructions": [
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "CU Limit",
+                "value": "90000 CUs"
+              }
+            ],
+            "intent": "Set compute unit limit",
+            "interpolatedIntent": "Set the compute unit limit to 90000 CUs"
+          },
+          "program": "ComputeBudget111111111111111111111111111111"
+        },
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "CU Price",
+                "value": "560773 micro-lamports/CU"
+              }
+            ],
+            "intent": "Set compute unit price",
+            "interpolatedIntent": "Set the compute unit price to 560773 micro-lamports/CU"
+          },
+          "program": "ComputeBudget111111111111111111111111111111"
+        },
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "Funder",
+                "value": "51rMk3PP8X99VV343cmEzAyAJbLMqGqsaHQh7RsFCkqS"
+              },
+              {
+                "label": "Token Account",
+                "value": "2JppYtSRJ2q1tnmWsBQkWYxTM7Z6abf4empLDeeHcd91"
+              },
+              {
+                "label": "Wallet",
+                "value": "51rMk3PP8X99VV343cmEzAyAJbLMqGqsaHQh7RsFCkqS"
+              },
+              {
+                "label": "Mint",
+                "value": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+              },
+              {
+                "label": "Token Program",
+                "value": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+              }
+            ],
+            "intent": "Create associated token account",
+            "interpolatedIntent": "Create the associated token account of 51rMk3PP8X99VV343cmEzAyAJbLMqGqsaHQh7RsFCkqS for mint EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+          },
+          "program": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "Funder",
+                "value": "51rMk3PP8X99VV343cmEzAyAJbLMqGqsaHQh7RsFCkqS"
+              },
+              {
+                "label": "Token Account",
+                "value": "ENtKjeSm15ru7StFLuCoqPLgXyKTYnziZ3ddTuCcwdSy"
+              },
+              {
+                "label": "Wallet",
+                "value": "A6bw9sMV7UFYimybXRUggj79j3p44VtASJZLqir7syx3"
+              },
+              {
+                "label": "Mint",
+                "value": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+              },
+              {
+                "label": "Token Program",
+                "value": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+              }
+            ],
+            "intent": "Create associated token account",
+            "interpolatedIntent": "Create the associated token account of A6bw9sMV7UFYimybXRUggj79j3p44VtASJZLqir7syx3 for mint EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+          },
+          "program": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "Funder",
+                "value": "51rMk3PP8X99VV343cmEzAyAJbLMqGqsaHQh7RsFCkqS"
+              },
+              {
+                "label": "Token Account",
+                "value": "2FzZfvRfBLmFdyXwVot1My2yAQDoMsSqsSZS9TLLdanw"
+              },
+              {
+                "label": "Wallet",
+                "value": "A6bw9sMV7UFYimybXRUggj79j3p44VtASJZLqir7syx3"
+              },
+              {
+                "label": "Mint",
+                "value": "So11111111111111111111111111111111111111112"
+              },
+              {
+                "label": "Token Program",
+                "value": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+              }
+            ],
+            "intent": "Create associated token account",
+            "interpolatedIntent": "Create the associated token account of A6bw9sMV7UFYimybXRUggj79j3p44VtASJZLqir7syx3 for mint So11111111111111111111111111111111111111112"
+          },
+          "program": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "Amount",
+                "value": "0.5 SOL"
+              },
+              {
+                "label": "From",
+                "value": "51rMk3PP8X99VV343cmEzAyAJbLMqGqsaHQh7RsFCkqS"
+              },
+              {
+                "label": "To",
+                "value": "2FzZfvRfBLmFdyXwVot1My2yAQDoMsSqsSZS9TLLdanw"
+              }
+            ],
+            "intent": "Transfer SOL",
+            "interpolatedIntent": "Transfer 0.5 SOL from 51rMk3PP8X99VV343cmEzAyAJbLMqGqsaHQh7RsFCkqS to 2FzZfvRfBLmFdyXwVot1My2yAQDoMsSqsSZS9TLLdanw"
+          },
+          "program": "11111111111111111111111111111111"
+        },
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "Token Account",
+                "value": "2FzZfvRfBLmFdyXwVot1My2yAQDoMsSqsSZS9TLLdanw"
+              }
+            ],
+            "intent": "Sync wrapped SOL",
+            "interpolatedIntent": "Sync the wrapped SOL balance of 2FzZfvRfBLmFdyXwVot1My2yAQDoMsSqsSZS9TLLdanw"
+          },
+          "program": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ]
+    },
+    "displayNext": {
+      "generator": "@codama/dynamic-instructions 2.0.0-rc.0 (codama 2.0.0-rc.0, IDLs upgraded by @codama/upgrade 2.0.0-rc.0)",
+      "instructions": [
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "CU Limit",
+                "value": "90000 CUs"
+              }
+            ],
+            "intent": "Set compute unit limit",
+            "interpolatedIntent": "Set the compute unit limit to 90000 CUs"
+          },
+          "program": "ComputeBudget111111111111111111111111111111"
+        },
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "CU Price",
+                "value": "560773 micro-lamports/CU"
+              }
+            ],
+            "intent": "Set compute unit price",
+            "interpolatedIntent": "Set the compute unit price to 560773 micro-lamports/CU"
+          },
+          "program": "ComputeBudget111111111111111111111111111111"
+        },
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "Funder",
+                "value": "51rMk3PP8X99VV343cmEzAyAJbLMqGqsaHQh7RsFCkqS"
+              },
+              {
+                "label": "Token Account",
+                "value": "2JppYtSRJ2q1tnmWsBQkWYxTM7Z6abf4empLDeeHcd91"
+              },
+              {
+                "label": "Wallet",
+                "value": "51rMk3PP8X99VV343cmEzAyAJbLMqGqsaHQh7RsFCkqS"
+              },
+              {
+                "label": "Mint",
+                "value": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+              },
+              {
+                "label": "Token Program",
+                "value": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+              }
+            ],
+            "intent": "Create associated token account",
+            "interpolatedIntent": "Create the associated token account of 51rMk3PP8X99VV343cmEzAyAJbLMqGqsaHQh7RsFCkqS for mint EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+          },
+          "program": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "Funder",
+                "value": "51rMk3PP8X99VV343cmEzAyAJbLMqGqsaHQh7RsFCkqS"
+              },
+              {
+                "label": "Token Account",
+                "value": "ENtKjeSm15ru7StFLuCoqPLgXyKTYnziZ3ddTuCcwdSy"
+              },
+              {
+                "label": "Wallet",
+                "value": "A6bw9sMV7UFYimybXRUggj79j3p44VtASJZLqir7syx3"
+              },
+              {
+                "label": "Mint",
+                "value": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+              },
+              {
+                "label": "Token Program",
+                "value": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+              }
+            ],
+            "intent": "Create associated token account",
+            "interpolatedIntent": "Create the associated token account of A6bw9sMV7UFYimybXRUggj79j3p44VtASJZLqir7syx3 for mint EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v"
+          },
+          "program": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "Funder",
+                "value": "51rMk3PP8X99VV343cmEzAyAJbLMqGqsaHQh7RsFCkqS"
+              },
+              {
+                "label": "Token Account",
+                "value": "2FzZfvRfBLmFdyXwVot1My2yAQDoMsSqsSZS9TLLdanw"
+              },
+              {
+                "label": "Wallet",
+                "value": "A6bw9sMV7UFYimybXRUggj79j3p44VtASJZLqir7syx3"
+              },
+              {
+                "label": "Mint",
+                "value": "So11111111111111111111111111111111111111112"
+              },
+              {
+                "label": "Token Program",
+                "value": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+              }
+            ],
+            "intent": "Create associated token account",
+            "interpolatedIntent": "Create the associated token account of A6bw9sMV7UFYimybXRUggj79j3p44VtASJZLqir7syx3 for mint So11111111111111111111111111111111111111112"
+          },
+          "program": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "Amount",
+                "value": "0.5 SOL"
+              },
+              {
+                "label": "From",
+                "value": "51rMk3PP8X99VV343cmEzAyAJbLMqGqsaHQh7RsFCkqS"
+              },
+              {
+                "label": "To",
+                "value": "2FzZfvRfBLmFdyXwVot1My2yAQDoMsSqsSZS9TLLdanw"
+              },
+              {
+                "label": "Remaining Account",
+                "value": "trfb53BmkHNeoqaa3REgqnrbwUZqAFYdjTkivkJ6aWg"
+              }
+            ],
+            "intent": "Transfer SOL",
+            "interpolatedIntent": "Transfer 0.5 SOL from 51rMk3PP8X99VV343cmEzAyAJbLMqGqsaHQh7RsFCkqS to 2FzZfvRfBLmFdyXwVot1My2yAQDoMsSqsSZS9TLLdanw"
+          },
+          "program": "11111111111111111111111111111111"
+        },
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "Token Account",
+                "value": "2FzZfvRfBLmFdyXwVot1My2yAQDoMsSqsSZS9TLLdanw"
+              }
+            ],
+            "intent": "Sync wrapped SOL",
+            "interpolatedIntent": "Sync the wrapped SOL balance of 2FzZfvRfBLmFdyXwVot1My2yAQDoMsSqsSZS9TLLdanw"
+          },
+          "program": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ]
+    },
+    "advisories": [
+      {
+        "detail": "valid only once trfb5...J6aWg also signs; whoever holds that signature decides when it is sent",
+        "kind": "co-signed"
+      },
+      {
+        "detail": "\"Transfer SOL\" also passes an account its description does not list: trfb5...J6aWg",
+        "kind": "extra-accounts"
+      }
+    ]
+  },
+  "id": "trezor-6843-co-signed-transfer",
+  "idls": [
+    "official/compute-budget.json",
+    "official/associated-token-account.json",
+    "official/system.json",
+    "official/token.json"
+  ],
+  "message": "AgEHDDumjnnZZJFCcnBaK4ts/D/qh6cZOZMqJ1g2l/lWUerdDUjHKsrOFPVwGfmQFwHHgWST75hdcLkGE1QZ/OgrO9USsufAQ5SDzjlVykSwZ3OScRsKuIIxnGtaGVC8uaHgPBNsoXdd6ZpsDkZAidHBoL6JjLDq893zI5too5cWj2W4xsMofRuo9JIu9XWLYFE3w+03dS5x8QFCWjaSVNa1tHIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAIcolgS+zxVuh09VrBOGFd1XBD4kR1s06UKYrOVZSSFojJclj04kifG7PRApFI4NgwtaE5na/xCEBI572Nvp+FkDBkZv5SEXMv/srbpyw5vnvIzlu8X3EmssQ5s6QAAAAMb6evO+2606PWXzaqvJdDGxu+TC0vbg5HymAgNFL11hBpuIV/6rgYT7aH9jRhjANdrEOdwa6ztVmKDwAAAAAAEG3fbh12Whk9nL4UbO63msHLSF7V9bN5E6jPWFfv8AqfdV0peOirqeB4Kuv6FaUrXw1WSz/cBgTzk0ghHAuwR/BwgABQKQXwEACAAJA4WOCAAAAAAABwYAAwAJBQsBAQcGAAQGCQULAQEHBgACBgoFCwEBBQMAAgEMAgAAAABlzR0AAAAACwECARE=",
+  "notes": [
+    "Posted in trezor-firmware#6843 (2026-04-28): an app adds its own signer to a transfer so that it alone decides when the transaction is sent. Trezor's firmware refused it until #6992 (2026-05-26). It stays here as a regression case.",
+    "Codama's stable display (@codama/dynamic-instructions 1.0.0) does not show the extra signer at all; the 2.0 release candidate lists it as a \"Remaining Account\" in the fallback fields (codama#1255). Neither interpolated sentence mentions it.",
+    "Seven instructions, five of them setup: the sentence a wallet builds by joining the interpolated intents is long, the concern Trezor and Ledger raised in the sRFC 39 discussion."
+  ],
+  "title": "A real Mainnet message: a SOL transfer that lists an extra signer, so the app co-signs and decides when it is sent"
+}

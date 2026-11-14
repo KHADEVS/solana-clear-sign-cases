@@ -1,0 +1,65 @@
+{
+  "class": "adversarial",
+  "context": {
+    "trustedPrograms": [
+      "11111111111111111111111111111111",
+      "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+      "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb",
+      "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL",
+      "ComputeBudget111111111111111111111111111111"
+    ]
+  },
+  "expected": {
+    "display": {
+      "generator": "@codama/dynamic-instructions 1.0.0 (codama 1.11.0)",
+      "instructions": [
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "Your token account",
+                "value": "9SwViC9CtEYv2jdXxZQLzPXqruGB2DdrFN199c8fZSzN"
+              }
+            ],
+            "intent": "Claim airdrop",
+            "interpolatedIntent": "Claim your 500 USDC airdrop into 9SwViC9CtEYv2jdXxZQLzPXqruGB2DdrFN199c8fZSzN"
+          },
+          "program": "GNQXj6UpZUGv55juWSZRFEXMCaFjfXAXX73hDuSMc9wb"
+        }
+      ]
+    },
+    "displayNext": {
+      "generator": "@codama/dynamic-instructions 2.0.0-rc.0 (codama 2.0.0-rc.0, IDLs upgraded by @codama/upgrade 2.0.0-rc.0)",
+      "instructions": [
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "Your token account",
+                "value": "9SwViC9CtEYv2jdXxZQLzPXqruGB2DdrFN199c8fZSzN"
+              }
+            ],
+            "intent": "Claim airdrop",
+            "interpolatedIntent": "Claim your 500 USDC airdrop into 9SwViC9CtEYv2jdXxZQLzPXqruGB2DdrFN199c8fZSzN"
+          },
+          "program": "GNQXj6UpZUGv55juWSZRFEXMCaFjfXAXX73hDuSMc9wb"
+        }
+      ]
+    },
+    "advisories": [
+      {
+        "detail": "\"Claim airdrop\" is how program GNQXj...Mc9wb describes itself; it is not on this wallet's trusted list, so the text may not match what the instruction does",
+        "kind": "untrusted-metadata"
+      }
+    ]
+  },
+  "id": "lying-metadata",
+  "idls": [
+    "custom/airdrop-claim.json"
+  ],
+  "message": "AQABA83idfwptDsC2eDWoBgu17+JPs0EZYAr2jo2eEP8IIjRfYKiIjkSPLVeamHE7upQzXtUOIU8/KqIR7s1SQY1DQPkWxsnBh1QwNenPsi8/lxwBMh2G2LQ6Ey8U6yWR+/R1hIEfuRmVFFrqHMfE/TIZ5KFkB7m0fq+pUeS4zdHDc4KAQICAAEBAQ==",
+  "notes": [
+    "No display can tell that this text is false: the program's own IDL says it. What can be checked is where the metadata comes from: the sRFC 39 discussion asks for curated lists of trusted programs, VisualSign checks IDL signatures against a curator allowlist, and the advisory uses such a list."
+  ],
+  "title": "A program whose own IDL describes an instruction as an airdrop claim"
+}

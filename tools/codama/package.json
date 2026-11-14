@@ -1,0 +1,15 @@
+{
+  "name": "clear-sign-cases-codama",
+  "private": true,
+  "type": "module",
+  "description": "Generates the expected displays with Codama's own instruction display (stable release; 2.0 release candidate kept for comparison)",
+  "dependencies": {
+    "@codama/dynamic-instructions": "1.0.0",
+    "codama": "1.11.0",
+    "@solana/addresses": "^8.3.0",
+    "@solana/instructions": "^8.3.0",
+    "dynamic-instructions-rc": "npm:@codama/dynamic-instructions@2.0.0-rc.0",
+    "codama-rc": "npm:codama@2.0.0-rc.0",
+    "codama-upgrade-rc": "npm:@codama/upgrade@2.0.0-rc.0"
+  }
+}

@@ -1,8 +1,8 @@
-//! Conformance cases for sRFC 39 (Solana Clear Sign), and a renderer that
-//! follows the draft as literally as possible, to check the cases against.
+//! Shared clear-signing cases for Solana: building the transactions, decoding
+//! them against Codama IDLs, and the advisories (not normative).
 
 pub mod advise;
 pub mod case;
+pub mod decode;
 pub mod message;
-pub mod render;
 pub mod util;

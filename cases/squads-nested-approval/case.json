@@ -2,8 +2,14 @@
   "class": "adversarial",
   "context": {
     "accounts": {
-      "8tV6VSNHPXEHEUq4MHyWKPEfFSHvfxpEbdSfP5wRjdfB": "qPqiZFEOos/kipYGISlv377Q3XZ8s84CECeStpChQsNLUW7L58YvBZL6P/OZaFagMaTMrsk6q+31y4H42IuZFhwS2Tw8gBbjBwAAAAAAAAD9AP4AAAAAAQABBAAAAGBdLVCauPCScu0vbMfpf6OViAU5BtWaYZ7aSqhQGn1KyWDWDiIddHa/X122da4FEv//j4y6oaoJwytw8URb+xchm5gdLjiscjp5sCUYljNVjCxL2Evl2tBT7Z6TYv8enwKo9pFOiKGw4hAVPvdjrisAwrk9FsEk0sBTehAEgAAAAQAAAAMDAAAAAQACBAAAAAQAAAAAAAAA",
-      "BsHdXW6JJt4j2cqXJCBCrjkD9A8fi8QdXdYLbiQ249ZW": "Gl69u3SINSHkipYGISlv377Q3XZ8s84CECeStpChQsNLUW7L58YvBQcAAAAAAAAAAcBZzGkAAAAA/gAAAAAAAAAAAAAAAA=="
+      "8tV6VSNHPXEHEUq4MHyWKPEfFSHvfxpEbdSfP5wRjdfB": {
+        "data": "qPqiZFEOos/kipYGISlv377Q3XZ8s84CECeStpChQsNLUW7L58YvBZL6P/OZaFagMaTMrsk6q+31y4H42IuZFhwS2Tw8gBbjBwAAAAAAAAD9AP4AAAAAAQABBAAAAGBdLVCauPCScu0vbMfpf6OViAU5BtWaYZ7aSqhQGn1KyWDWDiIddHa/X122da4FEv//j4y6oaoJwytw8URb+xchm5gdLjiscjp5sCUYljNVjCxL2Evl2tBT7Z6TYv8enwKo9pFOiKGw4hAVPvdjrisAwrk9FsEk0sBTehAEgAAAAQAAAAMDAAAAAQACBAAAAAQAAAAAAAAA",
+        "owner": "SQDS4ep65T869zMMBKyuUq6aD6EgTu8psMjkvj52pCf"
+      },
+      "BsHdXW6JJt4j2cqXJCBCrjkD9A8fi8QdXdYLbiQ249ZW": {
+        "data": "Gl69u3SINSHkipYGISlv377Q3XZ8s84CECeStpChQsNLUW7L58YvBQcAAAAAAAAAAcBZzGkAAAAA/gAAAAAAAAAAAAAAAA==",
+        "owner": "SQDS4ep65T869zMMBKyuUq6aD6EgTu8psMjkvj52pCf"
+      }
     },
     "names": {
       "Atjr5CGeHUFX3dfSZ79qa32dGYSptMaModR21hdcNa6e": "council member 2",
@@ -12,52 +18,126 @@
     }
   },
   "expected": {
+    "display": {
+      "generator": "@codama/dynamic-instructions 1.0.0 (codama 1.11.0)",
+      "instructions": [
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "Nonce Account",
+                "value": "6YzoX6XKCSNvc2uE6V2iy2fKYXHMEXRk2XfTYcPbyFHe"
+              },
+              {
+                "label": "Nonce Authority",
+                "value": "Atjr5CGeHUFX3dfSZ79qa32dGYSptMaModR21hdcNa6e"
+              }
+            ],
+            "intent": "Advance nonce account",
+            "interpolatedIntent": "Advance nonce account 6YzoX6XKCSNvc2uE6V2iy2fKYXHMEXRk2XfTYcPbyFHe"
+          },
+          "program": "11111111111111111111111111111111"
+        },
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "Memo",
+                "value": "none"
+              },
+              {
+                "label": "Multisig",
+                "value": "GP8XEaarvSeyr4pdKpRKqKA4PRs7EB6vEJefLRVjNRpQ"
+              },
+              {
+                "label": "Member",
+                "value": "Atjr5CGeHUFX3dfSZ79qa32dGYSptMaModR21hdcNa6e"
+              },
+              {
+                "label": "Proposal",
+                "value": "BsHdXW6JJt4j2cqXJCBCrjkD9A8fi8QdXdYLbiQ249ZW"
+              }
+            ],
+            "intent": "Approve proposal",
+            "interpolatedIntent": "Approve proposal BsHdXW6JJt4j2cqXJCBCrjkD9A8fi8QdXdYLbiQ249ZW of multisig GP8XEaarvSeyr4pdKpRKqKA4PRs7EB6vEJefLRVjNRpQ"
+          },
+          "program": "SQDS4ep65T869zMMBKyuUq6aD6EgTu8psMjkvj52pCf"
+        }
+      ]
+    },
+    "displayNext": {
+      "generator": "@codama/dynamic-instructions 2.0.0-rc.0 (codama 2.0.0-rc.0, IDLs upgraded by @codama/upgrade 2.0.0-rc.0)",
+      "instructions": [
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "Nonce Account",
+                "value": "6YzoX6XKCSNvc2uE6V2iy2fKYXHMEXRk2XfTYcPbyFHe"
+              },
+              {
+                "label": "Nonce Authority",
+                "value": "Atjr5CGeHUFX3dfSZ79qa32dGYSptMaModR21hdcNa6e"
+              }
+            ],
+            "intent": "Advance nonce account",
+            "interpolatedIntent": "Advance nonce account 6YzoX6XKCSNvc2uE6V2iy2fKYXHMEXRk2XfTYcPbyFHe"
+          },
+          "program": "11111111111111111111111111111111"
+        },
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "Memo",
+                "value": "None"
+              },
+              {
+                "label": "Multisig",
+                "value": "GP8XEaarvSeyr4pdKpRKqKA4PRs7EB6vEJefLRVjNRpQ"
+              },
+              {
+                "label": "Member",
+                "value": "Atjr5CGeHUFX3dfSZ79qa32dGYSptMaModR21hdcNa6e"
+              },
+              {
+                "label": "Proposal",
+                "value": "BsHdXW6JJt4j2cqXJCBCrjkD9A8fi8QdXdYLbiQ249ZW"
+              }
+            ],
+            "intent": "Approve proposal",
+            "interpolatedIntent": "Approve proposal BsHdXW6JJt4j2cqXJCBCrjkD9A8fi8QdXdYLbiQ249ZW of multisig GP8XEaarvSeyr4pdKpRKqKA4PRs7EB6vEJefLRVjNRpQ"
+          },
+          "program": "SQDS4ep65T869zMMBKyuUq6aD6EgTu8psMjkvj52pCf"
+        }
+      ]
+    },
     "advisories": [
       {
         "detail": "this signature stays valid until nonce account 6YzoX...byFHe is advanced; a normal signature expires within minutes",
         "kind": "durable-nonce"
       },
       {
-        "detail": "approves transaction 7 of Protocol council (2 of 5), which will: Change the upgrade authority of Protocol program to 3GC4c...wGsQi",
+        "detail": "approves transaction 7 of Protocol council (2 of 5), which runs: Set upgrade authority",
         "kind": "nested-transaction"
       },
       {
         "detail": "inside transaction 7: the upgrade authority of Protocol program goes to 3GC4c...wGsQi",
         "kind": "authority-change"
       }
-    ],
-    "fallback": [
-      "Advance durable nonce",
-      "Nonce account: 6YzoX...byFHe",
-      "Nonce authority: council member 2",
-      "Approve a multisig proposal",
-      "Multisig: Protocol council (2 of 5)",
-      "Proposal: BsHdX...249ZW",
-      "Memo: none"
-    ],
-    "fallbackWithoutMetadata": [
-      "Advance durable nonce",
-      "Nonce account: 6YzoX...byFHe",
-      "Nonce authority: Atjr5...cNa6e",
-      "Approve a multisig proposal",
-      "Multisig: GP8XE...jNRpQ",
-      "Proposal: BsHdX...249ZW",
-      "Memo: none"
-    ],
-    "interpolated": "Advance durable nonce 6YzoX...byFHe and Approve proposal BsHdX...249ZW of Protocol council (2 of 5)"
+    ]
   },
   "id": "squads-nested-approval",
   "idls": [
-    "system.json",
-    "squads-v4.json",
-    "bpf-loader-upgradeable.json"
+    "official/system.json",
+    "custom/squads-v4.json",
+    "custom/bpf-loader-upgradeable.json"
   ],
   "message": "AQAEB5L6P/OZaFagMaTMrsk6q+31y4H42IuZFhwS2Tw8gBbjUnzL9HggRYjuENhE/UY/4dasIs0Fby9W4ggCnDB2cp2hdraJ/rABY2Po7R4KNBG86niKE7d3SaQL75nWSI77pQan1RcZLFaO4IqEX3PSl4jPA1wxRbIas0TYBi6pQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADkipYGISlv377Q3XZ8s84CECeStpChQsNLUW7L58YvBQaBxM5H4iNouLFVXsiHrwku/H77tmyj9S+/aNSsnLeoovHxpiRt6Z5mWnCtfg7thOpDy1eQhEZIcPtfl9bTQ4MCBAMBAwAEBAAAAAYDBQACCZAlpIi82Cr4AA==",
   "notes": [
     "Modeled on the Drift exploit of April 1, 2026: an approval pre-signed with a durable nonce. Here the proposal's transaction changes a program's upgrade authority.",
-    "The rendering cannot say what the proposal executes: it is stored in the VaultTransaction account, which this instruction does not even reference. Ledger asked for account-data formatters for Squads; until the draft has them, only the advisories can show it. They decode it from the account data in the context, after checking the proposal and transaction addresses against their seeds.",
-    "The draft does not say how to show an absent optional value (the memo); \"none\" here."
+    "What the proposal executes is stored in the VaultTransaction account, which the approval does not even reference: no display of this instruction alone can show it. Ledger asked for account-data formatters for Squads in the sRFC 39 discussion. The advisories decode it from the account data in the context, after checking the proposal and transaction addresses against their seeds.",
+    "custom/squads-v4.json and custom/bpf-loader-upgradeable.json are written for these cases, in the official IDLs' format."
   ],
-  "srfc39": "sRFC 39 draft (solana-foundation/SRFCs discussion #4), as of 2026-06-11",
-  "title": "A durable-nonce approval of a Squads proposal that hands over a program's upgrade authority"
+  "title": "A durable-nonce approval of a Squads proposal whose transaction hands over a program's upgrade authority"
 }
