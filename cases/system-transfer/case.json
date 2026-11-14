@@ -1,0 +1,32 @@
+{
+  "class": "ordinary",
+  "context": {
+    "names": {
+      "5iQ9nmZMNNPL8W5dgR9Dm6KrhWAKeLCsuDV16xGXpUVb": "bob.sol"
+    }
+  },
+  "expected": {
+    "advisories": [],
+    "fallback": [
+      "Transfer SOL",
+      "To: bob.sol",
+      "Amount: 1.5 SOL"
+    ],
+    "fallbackWithoutMetadata": [
+      "Transfer SOL",
+      "To: 5iQ9n...XpUVb",
+      "Amount: 1.5 SOL"
+    ],
+    "interpolated": "Transfer 1.5 SOL to bob.sol"
+  },
+  "id": "system-transfer",
+  "idls": [
+    "system.json"
+  ],
+  "message": "AQABA83idfwptDsC2eDWoBgu17+JPs0EZYAr2jo2eEP8IIjRRgm9B/vuCxbvLfbZuy4sPBEQdf0Cl1tzutujRojOtx4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGDddVHrVpEJNwlk01mvhK3rvLb1kUls5697Iop9X4ycAQICAAEMAgAAAAAvaFkAAAAA",
+  "notes": [
+    "isNative needs no metadata: the amount keeps its unit when nothing else is known."
+  ],
+  "srfc39": "sRFC 39 draft (solana-foundation/SRFCs discussion #4), as of 2026-06-11",
+  "title": "A plain SOL transfer to a named address"
+}

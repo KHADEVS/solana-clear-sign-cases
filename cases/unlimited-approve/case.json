@@ -1,0 +1,52 @@
+{
+  "class": "adversarial",
+  "context": {
+    "names": {
+      "Ergrx3au6FfTPRqndTByRSMvE43bmmJ8gdEQcpsRJ1Ex": "alice.sol"
+    },
+    "tokenAccounts": {
+      "2YG6ei5dAt6TwmnZdNTsxtfDAmkxBA7mz581sNA3mRoD": {
+        "mint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+        "owner": "Ergrx3au6FfTPRqndTByRSMvE43bmmJ8gdEQcpsRJ1Ex"
+      }
+    },
+    "tokens": {
+      "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v": {
+        "decimals": 6,
+        "symbol": "USDC"
+      }
+    }
+  },
+  "expected": {
+    "advisories": [
+      {
+        "detail": "HeXdW...4MBJD may spend every token in alice.sol's account, now and later, until the approval is revoked",
+        "kind": "unlimited-approval"
+      }
+    ],
+    "fallback": [
+      "Approve a delegate",
+      "From: alice.sol",
+      "Delegate: HeXdW...4MBJD",
+      "Amount: 18446744073709.551615 USDC"
+    ],
+    "fallbackWithoutMetadata": [
+      "Approve a delegate",
+      "From: 2YG6e...3mRoD",
+      "Delegate: HeXdW...4MBJD",
+      "Amount: 18446744073709551615"
+    ],
+    "interpolated": "Allow HeXdW...4MBJD to spend 18446744073709.551615 USDC from alice.sol"
+  },
+  "id": "unlimited-approve",
+  "idls": [
+    "spl-token.json"
+  ],
+  "message": "AQACBM3idfwptDsC2eDWoBgu17+JPs0EZYAr2jo2eEP8IIjRFt3DQQFvYpfloHiWdeTkzRHa/8Yrjf25YmTCrx+pf7j3WB0NsJFDM0a6DMcS/TOy4Qb/2ls0rZnDIuEBHqeR3gbd9uHXZaGT2cvhRs7reawctIXtX1s3kTqM9YV+/wCp+gMP1iRU6K6tz74eMKy6oXpwGCDvtrU0aSuq0lXxSIsBAwMBAgAJBP//////////",
+  "notes": [
+    "The draft has no way to say that u64::MAX means unlimited, so the rendering shows the raw maximum; Ledger proposed maxThreshold and maxLabel for this.",
+    "approve carries no mint: the formatter's \"token\" names the source token account, read through its mint when metadata is available."
+  ],
+  "srfc39": "sRFC 39 draft (solana-foundation/SRFCs discussion #4), as of 2026-06-11",
+  "title": "An SPL Token approval of u64::MAX to an unknown delegate"
+}

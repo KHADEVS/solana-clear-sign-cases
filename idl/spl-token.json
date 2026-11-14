@@ -1,0 +1,36 @@
+{
+  "kind": "programNode",
+  "name": "token",
+  "publicKey": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA",
+  "docs": ["Display metadata written for these cases, in the sRFC 39 draft form."],
+  "instructions": [
+    {
+      "kind": "instructionNode",
+      "name": "approve",
+      "display": {
+        "kind": "instructionDisplayNode",
+        "intent": "Approve a delegate",
+        "interpolatedIntent": "Allow {delegate} to spend {amount} from {source}"
+      },
+      "accounts": [
+        { "kind": "instructionAccountNode", "name": "source", "isWritable": true, "isSigner": false,
+          "display": { "kind": "accountDisplayNode", "label": "From" } },
+        { "kind": "instructionAccountNode", "name": "delegate", "isWritable": false, "isSigner": false,
+          "display": { "kind": "accountDisplayNode", "label": "Delegate" } },
+        { "kind": "instructionAccountNode", "name": "owner", "isWritable": false, "isSigner": "either",
+          "display": { "kind": "accountDisplayNode", "skip": "always" } }
+      ],
+      "arguments": [
+        { "kind": "instructionArgumentNode", "name": "discriminator",
+          "type": { "kind": "numberTypeNode", "format": "u8", "endian": "le" },
+          "defaultValue": { "kind": "numberValueNode", "number": 4 },
+          "display": { "kind": "argumentDisplayNode", "skip": "always" } },
+        { "kind": "instructionArgumentNode", "name": "amount",
+          "type": { "kind": "numberTypeNode", "format": "u64", "endian": "le" },
+          "display": { "kind": "argumentDisplayNode", "label": "Amount",
+            "formatter": { "kind": "amountFormatterNode", "token": "source" } } }
+      ],
+      "discriminators": [ { "kind": "fieldDiscriminatorNode", "name": "discriminator", "offset": 0 } ]
+    }
+  ]
+}

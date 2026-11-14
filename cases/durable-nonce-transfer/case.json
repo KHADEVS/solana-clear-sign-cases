@@ -1,0 +1,43 @@
+{
+  "class": "adversarial",
+  "context": {
+    "names": {
+      "Ergrx3au6FfTPRqndTByRSMvE43bmmJ8gdEQcpsRJ1Ex": "alice.sol"
+    }
+  },
+  "expected": {
+    "advisories": [
+      {
+        "detail": "this signature stays valid until nonce account CcQnr...U4cn3 is advanced; a normal signature expires within minutes",
+        "kind": "durable-nonce"
+      }
+    ],
+    "fallback": [
+      "Advance durable nonce",
+      "Nonce account: CcQnr...U4cn3",
+      "Nonce authority: alice.sol",
+      "Transfer SOL",
+      "To: GuCFS...AzD1D",
+      "Amount: 1.5 SOL"
+    ],
+    "fallbackWithoutMetadata": [
+      "Advance durable nonce",
+      "Nonce account: CcQnr...U4cn3",
+      "Nonce authority: Ergrx...RJ1Ex",
+      "Transfer SOL",
+      "To: GuCFS...AzD1D",
+      "Amount: 1.5 SOL"
+    ],
+    "interpolated": "Advance durable nonce CcQnr...U4cn3 and Transfer 1.5 SOL to GuCFS...AzD1D"
+  },
+  "id": "durable-nonce-transfer",
+  "idls": [
+    "system.json"
+  ],
+  "message": "AQACBc3idfwptDsC2eDWoBgu17+JPs0EZYAr2jo2eEP8IIjRrILI3I+mMB3eHgQCL7BSVb9uDqpt3K3bVUR2fvtkSQjsPjmvHOaKMSrEWS8yizAYkila64efhCEK+FTO1Jfv1Aan1RcZLFaO4IqEX3PSl4jPA1wxRbIas0TYBi6pQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACnTRZ4byj1Jo8ucYYfxwkByYHB5jV7opjJnZFZ0adnIQIEAwEDAAQEAAAABAIAAgwCAAAAAC9oWQAAAAA=",
+  "notes": [
+    "The rendering says nothing about how long the signature stays valid; only the advisory does. SIMD discussion #513 proposes an explicit warning."
+  ],
+  "srfc39": "sRFC 39 draft (solana-foundation/SRFCs discussion #4), as of 2026-06-11",
+  "title": "A SOL transfer signed with a durable nonce: the signature does not expire"
+}
