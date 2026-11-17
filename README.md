@@ -38,7 +38,7 @@ This is an early draft, built to be discussed with the people working on it. The
 
 ## What the cases show today
 
-Checked on 2026-11-14 with `@codama/dynamic-instructions` 1.0.0 and 2.0.0-rc.0:
+Last checked on 2026-11-17 with `@codama/dynamic-instructions` 1.0.0 and 2.0.0-rc.0:
 
 1. **An extra account is invisible in the stable display.** In the `trezor-6843` message, the transfer lists an extra signer; 1.0.0 does not show it, 2.0.0-rc.0 lists it as a "Remaining Account" in the fields (not in the sentence).
 2. **Two valid forms, two different gaps.** The Associated Token Account program reads both empty data and `[0]` as Create. The official IDL matches `[0]` only, so Codama shows the empty form as unknown; Trezor's firmware handles the empty form only ([trezor-firmware#4387](https://github.com/trezor/trezor-firmware/issues/4387)).

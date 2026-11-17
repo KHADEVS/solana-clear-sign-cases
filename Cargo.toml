@@ -3,7 +3,7 @@ name = "clear-sign-cases"
 version = "0.1.0"
 edition = "2021"
 license = "MIT"
-description = "Conformance cases for sRFC 39 (Solana Clear Sign), with a reference renderer"
+description = "Shared clear-signing test cases for Solana, checked against Codama's instruction display"
 publish = false
 
 [dependencies]

@@ -1,5 +1,5 @@
-//! Advisories: what a careful wallet flags on top of the sRFC 39 rendering.
-//! Not part of the draft; kept apart so the rendering cases stay normative.
+//! Advisories: what a careful wallet flags on top of the display. Ours, not
+//! part of any spec; kept apart so the expected displays stay Codama's own.
 
 use crate::decode::{decode, Context, Programs};
 use crate::message::Instruction;

@@ -1,4 +1,4 @@
-//! Every case in `cases/` passes against the reference renderer.
+//! Every case in `cases/` decodes, and its advisories match.
 
 use clear_sign_cases::case::{check, load};
 use std::path::PathBuf;

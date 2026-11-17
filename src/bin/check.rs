@@ -1,4 +1,4 @@
-//! Checks the renderer against every case: `cargo run --bin check [cases dir]`.
+//! Checks every case (decoding and advisories): `cargo run --bin check [cases dir]`.
 
 use clear_sign_cases::case::{check, load};
 use std::path::PathBuf;

@@ -1,4 +1,4 @@
-//! Keys, hashes and number formatting shared by the renderer and the generator.
+//! Keys, hashes and number formatting shared by the decoder and the generator.
 
 use curve25519_dalek::edwards::{CompressedEdwardsY, EdwardsPoint};
 use curve25519_dalek::scalar::Scalar;
