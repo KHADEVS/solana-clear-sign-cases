@@ -1,6 +1,6 @@
 // Codama's own instruction display for a Solana message: decodes the message
-// (legacy or v0), finds each instruction's program in the given Codama IDLs,
-// and returns what @codama/dynamic-instructions shows for it.
+// (legacy, v0 or v1), finds each instruction's program in the given Codama
+// IDLs, and returns what @codama/dynamic-instructions shows for it.
 
 import { getInstructionDisplay } from '@codama/dynamic-instructions';
 import { getAddressDecoder } from '@solana/addresses';
@@ -34,9 +34,11 @@ export function decodeMessage(bytes, lookupTables = {}) {
     let version = null;
     if (first & 0x80) {
         version = first & 0x7f;
+        if (version > 1) throw new Error(`unsupported message version ${version}`);
         first = u8();
     }
     const [signers, readonlySigned, readonlyUnsigned] = [first, u8(), u8()];
+    if (version === 1) return decodeV1Body(bytes, pos, { signers, readonlySigned, readonlyUnsigned });
     const staticKeys = Array.from({ length: compact() }, key);
     pos += 32; // recent blockhash or nonce
     const compiled = Array.from({ length: compact() }, () => {
@@ -77,6 +79,58 @@ export function decodeMessage(bytes, lookupTables = {}) {
         })),
         signers: staticKeys.slice(0, signers),
         version,
+    };
+}
+
+/**
+ * The rest of a v1 message (SIMD-0385), from just after its legacy header:
+ * config mask, lifetime, counts, addresses, config values, instruction
+ * headers, then each instruction's accounts and data. No lookup tables.
+ */
+function decodeV1Body(bytes, start, header) {
+    let pos = start;
+    const take = n => {
+        if (pos + n > bytes.length) throw new Error('message ends too early');
+        const out = bytes.slice(pos, pos + n);
+        pos += n;
+        return out;
+    };
+    const mask = new DataView(Uint8Array.from(take(4)).buffer).getUint32(0, true);
+    if (mask & ~0b11111) throw new Error(`unknown config bits ${mask}`);
+    if ((mask & 0b11) === 0b01 || (mask & 0b11) === 0b10) throw new Error('the priority fee takes both config bits 0 and 1');
+    take(32); // lifetime specifier (recent blockhash or nonce)
+    const [instructionCount, addressCount] = take(2);
+    const keys = Array.from({ length: addressCount }, () => addressDecoder.decode(take(32)));
+    const config = {};
+    if (mask & 0b11) config.priorityFee = new DataView(Uint8Array.from(take(8)).buffer).getBigUint64(0, true);
+    for (const [bit, name] of [[4, 'computeUnitLimit'], [8, 'loadedAccountsDataSizeLimit'], [16, 'heapSize']]) {
+        if (mask & bit) config[name] = new DataView(Uint8Array.from(take(4)).buffer).getUint32(0, true);
+    }
+    const headers = Array.from({ length: instructionCount }, () => {
+        const [program, accounts, lo, hi] = take(4);
+        return { accounts, dataLength: lo | (hi << 8), program };
+    });
+    const compiled = headers.map(h => ({ accounts: [...take(h.accounts)], data: take(h.dataLength), program: h.program }));
+    if (pos !== bytes.length) throw new Error('trailing bytes after the message');
+    const { signers, readonlySigned, readonlyUnsigned } = header;
+    const role = index => {
+        if (index < signers) {
+            return index < signers - readonlySigned ? AccountRole.WRITABLE_SIGNER : AccountRole.READONLY_SIGNER;
+        }
+        return index < keys.length - readonlyUnsigned ? AccountRole.WRITABLE : AccountRole.READONLY;
+    };
+    return {
+        config,
+        instructions: compiled.map(ix => ({
+            accounts: ix.accounts.map(i => {
+                if (i >= keys.length) throw new Error(`account index ${i} out of range`);
+                return { address: keys[i], role: role(i) };
+            }),
+            data: ix.data,
+            programAddress: keys[ix.program],
+        })),
+        signers: keys.slice(0, signers),
+        version: 1,
     };
 }
 

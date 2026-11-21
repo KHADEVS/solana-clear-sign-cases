@@ -3,3 +3,5 @@
 - `associated-token-account.json`: https://github.com/solana-program/associated-token-account/blob/fbf5379e7398ac8b231c73ee8a9ff677b43dd0ec/idl.json
 - `compute-budget.json`: https://github.com/solana-program/compute-budget/blob/e189b8ca25ecc283354b96f12cdcd6d7f4246921/idl.json
 - `token-2022.json`: https://github.com/solana-program/token-2022/blob/e8ca680ca8aeb12f9598524b003c776c6a4168f2/idl.json
+- `stake.json`: https://github.com/solana-program/stake/blob/4894662d7da62df9abd8ca2b6ed7f4ce1e6e07e2/idl.json
+- `memo.json`: https://github.com/solana-program/memo/blob/bb9635e648a1ea1f6d3666042417f07c27f07ef8/idl.json

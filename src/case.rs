@@ -6,7 +6,7 @@
 
 use crate::advise::advise;
 use crate::decode::{decode, Context, Programs};
-use crate::message::{decode as decode_message, Instruction};
+use crate::message::{decode as decode_message, Config, Instruction};
 use crate::util::{from_b58, Key};
 use serde_json::Value;
 use std::collections::HashMap;
@@ -18,6 +18,8 @@ pub struct Case {
     pub instructions: Vec<Instruction>,
     /// The required signers, fee payer first.
     pub signers: Vec<Key>,
+    /// The header config of a v1 message.
+    pub config: Option<Config>,
     pub programs: Programs,
     pub context: Context,
 }
@@ -59,6 +61,7 @@ pub fn load(dir: &Path, idl_dir: &Path) -> Result<Case, String> {
         context: Context::from_json(&json["context"])?,
         instructions,
         signers,
+        config: message.config.clone(),
         json,
     })
 }
@@ -84,6 +87,7 @@ pub fn check(case: &Case) -> Vec<String> {
         &case.signers,
         &case.instructions,
         &case.context,
+        case.config.as_ref(),
     )
     .into_iter()
     .map(|a| format!("{}: {}", a.kind, a.detail))

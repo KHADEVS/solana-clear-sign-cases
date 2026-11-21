@@ -2,8 +2,8 @@
 //! part of any spec; kept apart so the expected displays stay Codama's own.
 
 use crate::decode::{decode, Context, Programs};
-use crate::message::Instruction;
-use crate::util::{anchor_discriminator, find_pda, from_b58, short, Key};
+use crate::message::{Config, Instruction};
+use crate::util::{anchor_discriminator, find_pda, format_amount, from_b58, short, Key};
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Advisory {
@@ -24,6 +24,9 @@ struct Ids {
     token_2022: Key,
     loader: Key,
     squads: Key,
+    compute_budget: Key,
+    stake: Key,
+    clock: Key,
 }
 
 fn ids() -> Ids {
@@ -34,7 +37,14 @@ fn ids() -> Ids {
         token_2022: key("TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"),
         loader: key("BPFLoaderUpgradeab1e11111111111111111111111"),
         squads: key("SQDS4ep65T869zMMBKyuUq6aD6EgTu8psMjkvj52pCf"),
+        compute_budget: key("ComputeBudget111111111111111111111111111111"),
+        stake: key("Stake11111111111111111111111111111111111111"),
+        clock: key("SysvarC1ock11111111111111111111111111111111"),
     }
+}
+
+fn sol(lamports: u64) -> String {
+    format!("{} SOL", format_amount(lamports as u128, 9))
 }
 
 fn u32_le(data: &[u8]) -> Option<u32> {
@@ -45,12 +55,14 @@ fn u64_at(data: &[u8], at: usize) -> Option<u64> {
     Some(u64::from_le_bytes(data.get(at..at + 8)?.try_into().ok()?))
 }
 
-/// `signers`: the message's required signers, fee payer first.
+/// `signers`: the message's required signers, fee payer first; `config`: the
+/// header config of a v1 message, `None` for legacy and v0.
 pub fn advise(
     programs: &Programs,
     signers: &[Key],
     instructions: &[Instruction],
     ctx: &Context,
+    config: Option<&Config>,
 ) -> Vec<Advisory> {
     let ids = ids();
     let mut out = Vec::new();
@@ -83,13 +95,51 @@ pub fn advise(
             }
         }
     }
+    // v1 (SIMD-0385) sets the fee and the limits in the message header: no
+    // instruction display shows them, and compute budget instructions, if
+    // any, are ignored for them.
+    if let Some(config) = config {
+        let limit = config
+            .compute_unit_limit
+            .map(|cu| format!(", compute unit limit {cu}"))
+            .unwrap_or_default();
+        out.push(advisory(
+            "header-fee",
+            format!(
+                "this v1 transaction sets its fee in the message header, which no instruction shows: priority fee {}{limit}",
+                sol(config.priority_fee)
+            ),
+        ));
+        let ignored = instructions
+            .iter()
+            .filter(|ix| ix.program == ids.compute_budget)
+            .count();
+        if ignored > 0 {
+            out.push(advisory(
+                "ignored-compute-budget",
+                format!(
+                    "{} compute budget instruction{} in this v1 transaction {} ignored for the fee and the limits: a fee worked out from {} is not the fee paid",
+                    ignored,
+                    if ignored == 1 { "" } else { "s" },
+                    if ignored == 1 { "is" } else { "are" },
+                    if ignored == 1 { "it" } else { "them" }
+                ),
+            ));
+        }
+    }
     for ix in instructions {
-        out.extend(advise_one(programs, ix, ctx, &ids));
+        out.extend(advise_one(programs, ix, ctx, &ids, signers));
     }
     out
 }
 
-fn advise_one(programs: &Programs, ix: &Instruction, ctx: &Context, ids: &Ids) -> Vec<Advisory> {
+fn advise_one(
+    programs: &Programs,
+    ix: &Instruction,
+    ctx: &Context,
+    ids: &Ids,
+    signers: &[Key],
+) -> Vec<Advisory> {
     let mut out = Vec::new();
     if let Ok(Some(decoded)) = decode(programs, ix) {
         // Metadata a wallet has not vetted can say anything about what an
@@ -100,36 +150,69 @@ fn advise_one(programs: &Programs, ix: &Instruction, ctx: &Context, ids: &Ids) -
                     "untrusted-metadata",
                     format!(
                         "\"{}\" is how program {} describes itself; it is not on this wallet's trusted list, so the text may not match what the instruction does",
-                        decoded.node["display"]["intent"].as_str().unwrap_or("?"),
+                        intent(decoded.node),
                         ctx.name_or_short(&ix.program)
                     ),
                 ));
             }
         }
-        // Accounts the instruction's description does not list: harmless to
-        // the program, but they can change who must sign (trezor-firmware#6843).
+        // Signers the instruction's description does not list, other than
+        // the fee payer: harmless to the program, but they change who must
+        // sign (trezor-firmware#6843). Unlisted accounts that do not sign are
+        // common (a router passes its pools that way, and the wallet's own
+        // key among them) and are left to the display.
         let declared = decoded.node["accounts"].as_array().map_or(0, Vec::len);
         let has_remaining = decoded.node["remainingAccounts"]
             .as_array()
             .is_some_and(|r| !r.is_empty());
         if ix.accounts.len() > declared && !has_remaining {
+            let mut seen = Vec::new();
             let extra: Vec<String> = ix.accounts[declared..]
                 .iter()
+                .filter(|k| signers.get(1..).is_some_and(|others| others.contains(k)))
+                .filter(|k| {
+                    let new = !seen.contains(*k);
+                    seen.push(**k);
+                    new
+                })
                 .map(|k| ctx.name_or_short(k))
                 .collect();
-            out.push(advisory(
-                "extra-accounts",
-                format!(
-                    "\"{}\" also passes {} its description does not list: {}",
-                    decoded.node["display"]["intent"].as_str().unwrap_or("?"),
-                    if extra.len() == 1 {
-                        "an account"
-                    } else {
-                        "accounts"
-                    },
-                    extra.join(", ")
-                ),
-            ));
+            if !extra.is_empty() {
+                out.push(advisory(
+                    "extra-signers",
+                    format!(
+                        "\"{}\" also passes {} its description does not list: {}",
+                        intent(decoded.node),
+                        if extra.len() == 1 {
+                            "a signer"
+                        } else {
+                            "signers"
+                        },
+                        extra.join(", ")
+                    ),
+                ));
+            }
+        }
+        // Stake instructions keep an older account list, told apart by the
+        // Clock sysvar in one position (stake program, processor.rs); the IDL
+        // describes only the newer, shorter list.
+        if ix.program == ids.stake {
+            let branch = match u32_le(&ix.data) {
+                Some(1 | 5) => Some(1),     // authorize, deactivate
+                Some(2 | 4 | 7) => Some(2), // delegate, withdraw, merge
+                _ => None,
+            };
+            if let Some(n) = branch.filter(|n| ix.accounts.get(*n) == Some(&ids.clock)) {
+                out.push(advisory(
+                    "older-account-list",
+                    format!(
+                        "\"{}\" uses the older account list, with the Clock sysvar as account {}, which the IDL does not describe: its account labels from account {} on do not match these accounts",
+                        intent(decoded.node),
+                        n + 1,
+                        n + 1
+                    ),
+                ));
+            }
         }
     }
     // A program the wallet has an IDL for, but no instruction of it matches:
@@ -159,6 +242,29 @@ fn advise_one(programs: &Programs, ix: &Instruction, ctx: &Context, ids: &Ids) -
                     ctx.name_or_short(&delegate),
                     ctx.holder(&source)
                 ),
+            ));
+        }
+    }
+    // SPL Token SetAuthority: [6, authority type, option tag, new authority].
+    if is_token && ix.data.first() == Some(&6) {
+        if let ([target, ..], Some(kind)) = (&ix.accounts[..], ix.data.get(1)) {
+            let new = match (ix.data.get(2), ix.data.get(3..35)) {
+                (Some(1), Some(key)) => ctx.name_or_short(&<Key>::try_from(key).expect("32 bytes")),
+                _ => "nobody".to_string(),
+            };
+            let what = match kind {
+                0 => format!("the mint authority of mint {}", ctx.name_or_short(target)),
+                1 => format!("the freeze authority of mint {}", ctx.name_or_short(target)),
+                2 => format!("the owner of {}'s token account", ctx.holder(target)),
+                3 => format!(
+                    "the close authority of {}'s token account",
+                    ctx.holder(target)
+                ),
+                other => format!("authority {other} of {}", ctx.name_or_short(target)),
+            };
+            out.push(advisory(
+                "authority-change",
+                format!("{what} goes to {new}"),
             ));
         }
     }
@@ -265,8 +371,10 @@ fn squads_approval(
             ctx.holder(&multisig)
         ),
     )];
+    // The inner transaction is signed by the vault, not by this message's
+    // signers: no inner account is one of them.
     for inner_ix in &inner {
-        for mut found in advise_one(programs, inner_ix, ctx, ids) {
+        for mut found in advise_one(programs, inner_ix, ctx, ids, &[]) {
             found.detail = format!("inside transaction {index}: {}", found.detail);
             out.push(found);
         }
@@ -274,14 +382,19 @@ fn squads_approval(
     out
 }
 
+/// An instruction node's display intent, or its name when it has no display
+/// metadata (IDLs converted from Anchor).
+fn intent(node: &serde_json::Value) -> &str {
+    node["display"]["intent"]
+        .as_str()
+        .or(node["name"].as_str())
+        .unwrap_or("?")
+}
+
 /// An instruction by its IDL intent, or by its program when no IDL knows it.
 fn describe(programs: &Programs, ix: &Instruction) -> String {
     match decode(programs, ix) {
-        Ok(Some(d)) => d.node["display"]["intent"]
-            .as_str()
-            .or(d.node["name"].as_str())
-            .unwrap_or("?")
-            .to_string(),
+        Ok(Some(d)) => intent(d.node).to_string(),
         _ => format!(
             "an instruction no IDL here describes, for program {}",
             programs

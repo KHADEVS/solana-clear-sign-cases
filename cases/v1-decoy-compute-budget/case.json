@@ -1,0 +1,132 @@
+{
+  "class": "adversarial",
+  "context": {},
+  "expected": {
+    "display": {
+      "generator": "@codama/dynamic-instructions 1.0.0 (codama 1.11.0)",
+      "instructions": [
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "CU Limit",
+                "value": "200000 CUs"
+              }
+            ],
+            "intent": "Set compute unit limit",
+            "interpolatedIntent": "Set the compute unit limit to 200000 CUs"
+          },
+          "program": "ComputeBudget111111111111111111111111111111"
+        },
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "CU Price",
+                "value": "1 micro-lamports/CU"
+              }
+            ],
+            "intent": "Set compute unit price",
+            "interpolatedIntent": "Set the compute unit price to 1 micro-lamports/CU"
+          },
+          "program": "ComputeBudget111111111111111111111111111111"
+        },
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "Amount",
+                "value": "0.01 SOL"
+              },
+              {
+                "label": "From",
+                "value": "Ergrx3au6FfTPRqndTByRSMvE43bmmJ8gdEQcpsRJ1Ex"
+              },
+              {
+                "label": "To",
+                "value": "5iQ9nmZMNNPL8W5dgR9Dm6KrhWAKeLCsuDV16xGXpUVb"
+              }
+            ],
+            "intent": "Transfer SOL",
+            "interpolatedIntent": "Transfer 0.01 SOL from Ergrx3au6FfTPRqndTByRSMvE43bmmJ8gdEQcpsRJ1Ex to 5iQ9nmZMNNPL8W5dgR9Dm6KrhWAKeLCsuDV16xGXpUVb"
+          },
+          "program": "11111111111111111111111111111111"
+        }
+      ]
+    },
+    "displayNext": {
+      "generator": "@codama/dynamic-instructions 2.0.0-rc.0 (codama 2.0.0-rc.0, IDLs upgraded by @codama/upgrade 2.0.0-rc.0)",
+      "instructions": [
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "CU Limit",
+                "value": "200000 CUs"
+              }
+            ],
+            "intent": "Set compute unit limit",
+            "interpolatedIntent": "Set the compute unit limit to 200000 CUs"
+          },
+          "program": "ComputeBudget111111111111111111111111111111"
+        },
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "CU Price",
+                "value": "1 micro-lamports/CU"
+              }
+            ],
+            "intent": "Set compute unit price",
+            "interpolatedIntent": "Set the compute unit price to 1 micro-lamports/CU"
+          },
+          "program": "ComputeBudget111111111111111111111111111111"
+        },
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "Amount",
+                "value": "0.01 SOL"
+              },
+              {
+                "label": "From",
+                "value": "Ergrx3au6FfTPRqndTByRSMvE43bmmJ8gdEQcpsRJ1Ex"
+              },
+              {
+                "label": "To",
+                "value": "5iQ9nmZMNNPL8W5dgR9Dm6KrhWAKeLCsuDV16xGXpUVb"
+              }
+            ],
+            "intent": "Transfer SOL",
+            "interpolatedIntent": "Transfer 0.01 SOL from Ergrx3au6FfTPRqndTByRSMvE43bmmJ8gdEQcpsRJ1Ex to 5iQ9nmZMNNPL8W5dgR9Dm6KrhWAKeLCsuDV16xGXpUVb"
+          },
+          "program": "11111111111111111111111111111111"
+        }
+      ]
+    },
+    "advisories": [
+      {
+        "detail": "this v1 transaction sets its fee in the message header, which no instruction shows: priority fee 0.5 SOL, compute unit limit 200000",
+        "kind": "header-fee"
+      },
+      {
+        "detail": "2 compute budget instructions in this v1 transaction are ignored for the fee and the limits: a fee worked out from them is not the fee paid",
+        "kind": "ignored-compute-budget"
+      }
+    ]
+  },
+  "id": "v1-decoy-compute-budget",
+  "idls": [
+    "official/compute-budget.json",
+    "official/system.json"
+  ],
+  "message": "gQEAAgcAAACKHEcuLZ1ZWyzRelza/HJCQD7xdT9E7fG3CyL0cbXNRgMEzeJ1/Cm0OwLZ4NagGC7Xv4k+zQRlgCvaOjZ4Q/wgiNFGCb0H++4LFu8t9tm7Liw8ERB1/QKXW3O626NGiM63HgMGRm/lIRcy/+ytunLDm+e8jOW7xfcSayxDmzpAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAZc0dAAAAAEANAwACAAUAAgAJAAMCDAACQA0DAAMBAAAAAAAAAAABAgAAAICWmAAAAAAA",
+  "notes": [
+    "SIMD-0385: in a v1 transaction, compute budget instructions are ignored for the fee and the limits, and run as no-ops. The header's config sets them.",
+    "Here the instructions set 1 micro-lamport per unit, less than a lamport in all, and the display shows exactly that; the header pays 0.5 SOL. A wallet that works out the fee from the instructions, as legacy and v0 require, shows the decoy. Trezor's firmware reads the header for v1 (core/src/apps/solana/transaction, since 2026-10-21).",
+    "Real v1 transactions carry such instructions too: some apps add them out of habit (8 of 940 v1 transactions in the 2026-11-21 sample)."
+  ],
+  "title": "A v1 transaction whose compute budget instructions say 1 micro-lamport per unit, while its header pays 0.5 SOL"
+}

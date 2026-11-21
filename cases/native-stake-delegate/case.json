@@ -1,0 +1,290 @@
+{
+  "class": "ordinary",
+  "context": {},
+  "expected": {
+    "display": {
+      "generator": "@codama/dynamic-instructions 1.0.0 (codama 1.11.0)",
+      "instructions": [
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "CU Limit",
+                "value": "400000 CUs"
+              }
+            ],
+            "intent": "Set compute unit limit",
+            "interpolatedIntent": "Set the compute unit limit to 400000 CUs"
+          },
+          "program": "ComputeBudget111111111111111111111111111111"
+        },
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "CU Price",
+                "value": "50000 micro-lamports/CU"
+              }
+            ],
+            "intent": "Set compute unit price",
+            "interpolatedIntent": "Set the compute unit price to 50000 micro-lamports/CU"
+          },
+          "program": "ComputeBudget111111111111111111111111111111"
+        },
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "Base Address",
+                "value": "BrqHfAtSbhgQ5TBMVN3VGpp35GC5EkHY46FpgGGDh4gh"
+              },
+              {
+                "label": "Seed",
+                "value": "f1e906528d6b0aa410ca104b78d982"
+              },
+              {
+                "label": "Funding Amount",
+                "value": "145.6 SOL"
+              },
+              {
+                "label": "Space",
+                "value": "200 bytes"
+              },
+              {
+                "label": "Owner Program",
+                "value": "Stake11111111111111111111111111111111111111"
+              },
+              {
+                "label": "Payer",
+                "value": "BrqHfAtSbhgQ5TBMVN3VGpp35GC5EkHY46FpgGGDh4gh"
+              },
+              {
+                "label": "New Account",
+                "value": "ChzrcqsFbjyPSBr1QWs1m4kbdm79zFrBkXQEADUedDtt"
+              }
+            ],
+            "intent": "Create account with seed",
+            "interpolatedIntent": "Create account ChzrcqsFbjyPSBr1QWs1m4kbdm79zFrBkXQEADUedDtt with 145.6 SOL"
+          },
+          "program": "11111111111111111111111111111111"
+        },
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "Staker",
+                "value": "BrqHfAtSbhgQ5TBMVN3VGpp35GC5EkHY46FpgGGDh4gh"
+              },
+              {
+                "label": "Withdrawer",
+                "value": "BrqHfAtSbhgQ5TBMVN3VGpp35GC5EkHY46FpgGGDh4gh"
+              },
+              {
+                "label": "Locked Until",
+                "value": "1970-01-01T00:00:00.000Z"
+              },
+              {
+                "label": "Locked Until Epoch",
+                "value": "0"
+              },
+              {
+                "label": "Custodian",
+                "value": "11111111111111111111111111111111"
+              },
+              {
+                "label": "Stake Account",
+                "value": "ChzrcqsFbjyPSBr1QWs1m4kbdm79zFrBkXQEADUedDtt"
+              }
+            ],
+            "intent": "Initialize stake account",
+            "interpolatedIntent": "Initialize stake account ChzrcqsFbjyPSBr1QWs1m4kbdm79zFrBkXQEADUedDtt"
+          },
+          "program": "Stake11111111111111111111111111111111111111"
+        },
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "Stake Account",
+                "value": "ChzrcqsFbjyPSBr1QWs1m4kbdm79zFrBkXQEADUedDtt"
+              },
+              {
+                "label": "Vote Account",
+                "value": "BbM5kJgrwEj3tYFfBPnjcARB54wDUHkXmLUTkazUmt2x"
+              },
+              {
+                "label": "Stake Authority",
+                "value": "SysvarC1ock11111111111111111111111111111111"
+              }
+            ],
+            "intent": "Delegate stake",
+            "interpolatedIntent": "Delegate ChzrcqsFbjyPSBr1QWs1m4kbdm79zFrBkXQEADUedDtt to vote account BbM5kJgrwEj3tYFfBPnjcARB54wDUHkXmLUTkazUmt2x"
+          },
+          "program": "Stake11111111111111111111111111111111111111"
+        }
+      ]
+    },
+    "displayNext": {
+      "generator": "@codama/dynamic-instructions 2.0.0-rc.0 (codama 2.0.0-rc.0, IDLs upgraded by @codama/upgrade 2.0.0-rc.0)",
+      "instructions": [
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "CU Limit",
+                "value": "400000 CUs"
+              }
+            ],
+            "intent": "Set compute unit limit",
+            "interpolatedIntent": "Set the compute unit limit to 400000 CUs"
+          },
+          "program": "ComputeBudget111111111111111111111111111111"
+        },
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "CU Price",
+                "value": "50000 micro-lamports/CU"
+              }
+            ],
+            "intent": "Set compute unit price",
+            "interpolatedIntent": "Set the compute unit price to 50000 micro-lamports/CU"
+          },
+          "program": "ComputeBudget111111111111111111111111111111"
+        },
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "Base Address",
+                "value": "BrqHfAtSbhgQ5TBMVN3VGpp35GC5EkHY46FpgGGDh4gh"
+              },
+              {
+                "label": "Seed",
+                "value": "f1e906528d6b0aa410ca104b78d982"
+              },
+              {
+                "label": "Funding Amount",
+                "value": "145.6 SOL"
+              },
+              {
+                "label": "Space",
+                "value": "200 bytes"
+              },
+              {
+                "label": "Owner Program",
+                "value": "Stake11111111111111111111111111111111111111"
+              },
+              {
+                "label": "Payer",
+                "value": "BrqHfAtSbhgQ5TBMVN3VGpp35GC5EkHY46FpgGGDh4gh"
+              },
+              {
+                "label": "New Account",
+                "value": "ChzrcqsFbjyPSBr1QWs1m4kbdm79zFrBkXQEADUedDtt"
+              }
+            ],
+            "intent": "Create account with seed",
+            "interpolatedIntent": "Create account ChzrcqsFbjyPSBr1QWs1m4kbdm79zFrBkXQEADUedDtt with 145.6 SOL"
+          },
+          "program": "11111111111111111111111111111111"
+        },
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "Staker",
+                "value": "BrqHfAtSbhgQ5TBMVN3VGpp35GC5EkHY46FpgGGDh4gh"
+              },
+              {
+                "label": "Withdrawer",
+                "value": "BrqHfAtSbhgQ5TBMVN3VGpp35GC5EkHY46FpgGGDh4gh"
+              },
+              {
+                "label": "Locked Until",
+                "value": "1970-01-01T00:00:00Z"
+              },
+              {
+                "label": "Locked Until Epoch",
+                "value": "0"
+              },
+              {
+                "label": "Custodian",
+                "value": "11111111111111111111111111111111"
+              },
+              {
+                "label": "Stake Account",
+                "value": "ChzrcqsFbjyPSBr1QWs1m4kbdm79zFrBkXQEADUedDtt"
+              },
+              {
+                "label": "Remaining Account",
+                "value": "SysvarRent111111111111111111111111111111111"
+              }
+            ],
+            "intent": "Initialize stake account",
+            "interpolatedIntent": "Initialize stake account ChzrcqsFbjyPSBr1QWs1m4kbdm79zFrBkXQEADUedDtt"
+          },
+          "program": "Stake11111111111111111111111111111111111111"
+        },
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "Stake Account",
+                "value": "ChzrcqsFbjyPSBr1QWs1m4kbdm79zFrBkXQEADUedDtt"
+              },
+              {
+                "label": "Vote Account",
+                "value": "BbM5kJgrwEj3tYFfBPnjcARB54wDUHkXmLUTkazUmt2x"
+              },
+              {
+                "label": "Stake Authority",
+                "value": "SysvarC1ock11111111111111111111111111111111"
+              },
+              {
+                "label": "Remaining Account #1",
+                "value": "SysvarStakeHistory1111111111111111111111111"
+              },
+              {
+                "label": "Remaining Account #2",
+                "value": "StakeConfig11111111111111111111111111111111"
+              },
+              {
+                "label": "Remaining Account #3",
+                "value": "BrqHfAtSbhgQ5TBMVN3VGpp35GC5EkHY46FpgGGDh4gh"
+              }
+            ],
+            "intent": "Delegate stake",
+            "interpolatedIntent": "Delegate ChzrcqsFbjyPSBr1QWs1m4kbdm79zFrBkXQEADUedDtt to vote account BbM5kJgrwEj3tYFfBPnjcARB54wDUHkXmLUTkazUmt2x"
+          },
+          "program": "Stake11111111111111111111111111111111111111"
+        }
+      ]
+    },
+    "advisories": [
+      {
+        "detail": "\"Delegate stake\" uses the older account list, with the Clock sysvar as account 3, which the IDL does not describe: its account labels from account 3 on do not match these accounts",
+        "kind": "older-account-list"
+      }
+    ]
+  },
+  "id": "native-stake-delegate",
+  "idls": [
+    "official/compute-budget.json",
+    "official/system.json",
+    "official/stake.json"
+  ],
+  "message": "AQAICqFY7WwBQqafkVUu+HfD2P1ePRySypLY6Q21Ye9My9YKrfE0uXxnZIuOa3VTBs/uR2n/qkXVbeKkSciRchAFnsEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJ1hUsj8/W2hYtDse/xIvXRUJYSIDYvFUOeiUIsbLOSNAwZGb+UhFzL/7K26csOb57yM5bvF9xJrLEObOkAAAAAGodgXkTdUKpg0N73+KnqyVX9TXIp4citopJ3AAAAAAAah2BelAgULaAeR5s5tuI4eW3FQ9h/GeQpOtNEAAAAABqfVFxjHdMkoVmOYaR1etoteuKObS21cc1VbIQAAAAAGp9UXGSxcUSGMyUw9SvF/WNruCJuh/UTj29mKAAAAAAan1RcZNYTQ/u2bs0MdEyBr5UQoG1e4VmzFN1/0AAAAr6M3cs7AZyrBvOR3bZDCwz3fdVE6DxhWCCsppjjku9EFBAAFAoAaBgAEAAkDUMMAAAAAAAACAgABegMAAAChWO1sAUKmn5FVLvh3w9j9Xj0cksqS2OkNtWHvTMvWCh4AAAAAAAAAZjFlOTA2NTI4ZDZiMGFhNDEwY2ExMDRiNzhkOTgyALBv5iEAAADIAAAAAAAAAAah2BeRN1QqmDQ3vf4qerJVf1NcinhyK2ikncAAAAAABQIBCHQAAAAAoVjtbAFCpp+RVS74d8PY/V49HJLKktjpDbVh70zL1gqhWO1sAUKmn5FVLvh3w9j9Xj0cksqS2OkNtWHvTMvWCgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAUGAQMHCQYABAIAAAA=",
+  "notes": [
+    "A Mainnet transaction as signed (legacy): 145.6 SOL into a new stake account, delegated to a validator.",
+    "The stake program accepts two account lists for DelegateStake: the older one (stake, vote, Clock, stake history, config, then the authority) and a newer one (stake, vote, authority). It tells them apart by the Clock sysvar in third place (process_delegate in program/src/processor.rs). The official IDL describes only the newer list, so on this transaction Codama's display labels the Clock sysvar \"Stake Authority\". Authorize, Withdraw, Deactivate and Merge have the same two lists.",
+    "Nothing here moves funds where the display does not say, and the program checks every signer whatever the list; only the labels are wrong."
+  ],
+  "source": {
+    "network": "mainnet",
+    "signature": "2KmGp8zgEaJgQo2dR4WTD62mXY8XEcZYYwMK5dzD9kbzkZ4dgMSp4myrBkpzBxGUHhD8yhuHpufGteQDytAzAvPz",
+    "slot": 472228684
+  },
+  "title": "A real stake delegation: create a stake account with a seed, initialize it, delegate it"
+}

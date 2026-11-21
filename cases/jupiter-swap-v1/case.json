@@ -1,0 +1,582 @@
+{
+  "class": "ordinary",
+  "context": {},
+  "expected": {
+    "display": {
+      "generator": "@codama/dynamic-instructions 1.0.0 (codama 1.11.0)",
+      "instructions": [
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "Funder",
+                "value": "BdCGBmrxUatro78dDdimoeXnF4vXvVuGECXHRfNYQDTc"
+              },
+              {
+                "label": "Token Account",
+                "value": "HE6WiNv56FizLbSE34CvHbLwkpWicpUegSNcbtu54q1A"
+              },
+              {
+                "label": "Wallet",
+                "value": "BdCGBmrxUatro78dDdimoeXnF4vXvVuGECXHRfNYQDTc"
+              },
+              {
+                "label": "Mint",
+                "value": "So11111111111111111111111111111111111111112"
+              },
+              {
+                "label": "Token Program",
+                "value": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+              }
+            ],
+            "intent": "Create associated token account",
+            "interpolatedIntent": "Create the associated token account of BdCGBmrxUatro78dDdimoeXnF4vXvVuGECXHRfNYQDTc for mint So11111111111111111111111111111111111111112"
+          },
+          "program": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "Amount",
+                "value": "0.2 SOL"
+              },
+              {
+                "label": "From",
+                "value": "BdCGBmrxUatro78dDdimoeXnF4vXvVuGECXHRfNYQDTc"
+              },
+              {
+                "label": "To",
+                "value": "HE6WiNv56FizLbSE34CvHbLwkpWicpUegSNcbtu54q1A"
+              }
+            ],
+            "intent": "Transfer SOL",
+            "interpolatedIntent": "Transfer 0.2 SOL from BdCGBmrxUatro78dDdimoeXnF4vXvVuGECXHRfNYQDTc to HE6WiNv56FizLbSE34CvHbLwkpWicpUegSNcbtu54q1A"
+          },
+          "program": "11111111111111111111111111111111"
+        },
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "Token Account",
+                "value": "HE6WiNv56FizLbSE34CvHbLwkpWicpUegSNcbtu54q1A"
+              }
+            ],
+            "intent": "Sync wrapped SOL",
+            "interpolatedIntent": "Sync the wrapped SOL balance of HE6WiNv56FizLbSE34CvHbLwkpWicpUegSNcbtu54q1A"
+          },
+          "program": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "Funder",
+                "value": "BdCGBmrxUatro78dDdimoeXnF4vXvVuGECXHRfNYQDTc"
+              },
+              {
+                "label": "Token Account",
+                "value": "6T8bwTHDrq7Dad4n91fJ8e4eEmsytuLdEdsDn7W2jYyy"
+              },
+              {
+                "label": "Wallet",
+                "value": "BdCGBmrxUatro78dDdimoeXnF4vXvVuGECXHRfNYQDTc"
+              },
+              {
+                "label": "Mint",
+                "value": "ngwxpGYdkauMcxLFrNTKp8qBgK7JV53zVvd7F2spump"
+              },
+              {
+                "label": "Token Program",
+                "value": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+              }
+            ],
+            "intent": "Create associated token account",
+            "interpolatedIntent": "Create the associated token account of BdCGBmrxUatro78dDdimoeXnF4vXvVuGECXHRfNYQDTc for mint ngwxpGYdkauMcxLFrNTKp8qBgK7JV53zVvd7F2spump"
+          },
+          "program": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "Discriminator",
+                "value": "[\"base64\",\"u2T6zDHErxQ=\"]"
+              },
+              {
+                "label": "In Amount",
+                "value": "200000000"
+              },
+              {
+                "label": "Quoted Out Amount",
+                "value": "71961834875"
+              },
+              {
+                "label": "Slippage Bps",
+                "value": "1500"
+              },
+              {
+                "label": "Platform Fee Bps",
+                "value": "0"
+              },
+              {
+                "label": "Positive Slippage Bps",
+                "value": "0"
+              },
+              {
+                "label": "Route Plan",
+                "value": "{\"swap\":{\"__discriminator\":193,\"__kind\":\"PumpSwapBuyV4\",\"closeUserVolumeAccumulator\":false},\"bps\":10000,\"inputIndex\":0,\"outputIndex\":1}"
+              },
+              {
+                "label": "User Transfer Authority",
+                "value": "BdCGBmrxUatro78dDdimoeXnF4vXvVuGECXHRfNYQDTc"
+              },
+              {
+                "label": "User Source Token Account",
+                "value": "HE6WiNv56FizLbSE34CvHbLwkpWicpUegSNcbtu54q1A"
+              },
+              {
+                "label": "User Destination Token Account",
+                "value": "6T8bwTHDrq7Dad4n91fJ8e4eEmsytuLdEdsDn7W2jYyy"
+              },
+              {
+                "label": "Source Mint",
+                "value": "So11111111111111111111111111111111111111112"
+              },
+              {
+                "label": "Destination Mint",
+                "value": "ngwxpGYdkauMcxLFrNTKp8qBgK7JV53zVvd7F2spump"
+              },
+              {
+                "label": "Source Token Program",
+                "value": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+              },
+              {
+                "label": "Destination Token Program",
+                "value": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+              },
+              {
+                "label": "Destination Token Account",
+                "value": "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4"
+              },
+              {
+                "label": "Event Authority",
+                "value": "D8cy77BBepLMngZx6ZukaTff5hCt1HrWyKk3Hnd9oitf"
+              },
+              {
+                "label": "Program",
+                "value": "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4"
+              }
+            ],
+            "intent": "Route V2",
+            "interpolatedIntent": null
+          },
+          "program": "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4"
+        },
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "Token Account",
+                "value": "HE6WiNv56FizLbSE34CvHbLwkpWicpUegSNcbtu54q1A"
+              },
+              {
+                "label": "Recipient",
+                "value": "BdCGBmrxUatro78dDdimoeXnF4vXvVuGECXHRfNYQDTc"
+              },
+              {
+                "label": "Owner",
+                "value": "BdCGBmrxUatro78dDdimoeXnF4vXvVuGECXHRfNYQDTc"
+              }
+            ],
+            "intent": "Close token account",
+            "interpolatedIntent": "Close HE6WiNv56FizLbSE34CvHbLwkpWicpUegSNcbtu54q1A and send its balance to BdCGBmrxUatro78dDdimoeXnF4vXvVuGECXHRfNYQDTc"
+          },
+          "program": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "Amount",
+                "value": "0.0016 SOL"
+              },
+              {
+                "label": "From",
+                "value": "BdCGBmrxUatro78dDdimoeXnF4vXvVuGECXHRfNYQDTc"
+              },
+              {
+                "label": "To",
+                "value": "HR6xhpJYYiTvmAtUZvpLMN7qbr6TxCw1Sgq3fab8vCoa"
+              }
+            ],
+            "intent": "Transfer SOL",
+            "interpolatedIntent": "Transfer 0.0016 SOL from BdCGBmrxUatro78dDdimoeXnF4vXvVuGECXHRfNYQDTc to HR6xhpJYYiTvmAtUZvpLMN7qbr6TxCw1Sgq3fab8vCoa"
+          },
+          "program": "11111111111111111111111111111111"
+        },
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "Amount",
+                "value": "0.0004 SOL"
+              },
+              {
+                "label": "From",
+                "value": "BdCGBmrxUatro78dDdimoeXnF4vXvVuGECXHRfNYQDTc"
+              },
+              {
+                "label": "To",
+                "value": "6GWuvrdRP3b2RStBZx3YmADJ5Rd4BCgP39rPrQVWSEhR"
+              }
+            ],
+            "intent": "Transfer SOL",
+            "interpolatedIntent": "Transfer 0.0004 SOL from BdCGBmrxUatro78dDdimoeXnF4vXvVuGECXHRfNYQDTc to 6GWuvrdRP3b2RStBZx3YmADJ5Rd4BCgP39rPrQVWSEhR"
+          },
+          "program": "11111111111111111111111111111111"
+        }
+      ]
+    },
+    "displayNext": {
+      "generator": "@codama/dynamic-instructions 2.0.0-rc.0 (codama 2.0.0-rc.0, IDLs upgraded by @codama/upgrade 2.0.0-rc.0)",
+      "instructions": [
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "Funder",
+                "value": "BdCGBmrxUatro78dDdimoeXnF4vXvVuGECXHRfNYQDTc"
+              },
+              {
+                "label": "Token Account",
+                "value": "HE6WiNv56FizLbSE34CvHbLwkpWicpUegSNcbtu54q1A"
+              },
+              {
+                "label": "Wallet",
+                "value": "BdCGBmrxUatro78dDdimoeXnF4vXvVuGECXHRfNYQDTc"
+              },
+              {
+                "label": "Mint",
+                "value": "So11111111111111111111111111111111111111112"
+              },
+              {
+                "label": "Token Program",
+                "value": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+              }
+            ],
+            "intent": "Create associated token account",
+            "interpolatedIntent": "Create the associated token account of BdCGBmrxUatro78dDdimoeXnF4vXvVuGECXHRfNYQDTc for mint So11111111111111111111111111111111111111112"
+          },
+          "program": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "Amount",
+                "value": "0.2 SOL"
+              },
+              {
+                "label": "From",
+                "value": "BdCGBmrxUatro78dDdimoeXnF4vXvVuGECXHRfNYQDTc"
+              },
+              {
+                "label": "To",
+                "value": "HE6WiNv56FizLbSE34CvHbLwkpWicpUegSNcbtu54q1A"
+              }
+            ],
+            "intent": "Transfer SOL",
+            "interpolatedIntent": "Transfer 0.2 SOL from BdCGBmrxUatro78dDdimoeXnF4vXvVuGECXHRfNYQDTc to HE6WiNv56FizLbSE34CvHbLwkpWicpUegSNcbtu54q1A"
+          },
+          "program": "11111111111111111111111111111111"
+        },
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "Token Account",
+                "value": "HE6WiNv56FizLbSE34CvHbLwkpWicpUegSNcbtu54q1A"
+              }
+            ],
+            "intent": "Sync wrapped SOL",
+            "interpolatedIntent": "Sync the wrapped SOL balance of HE6WiNv56FizLbSE34CvHbLwkpWicpUegSNcbtu54q1A"
+          },
+          "program": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "Funder",
+                "value": "BdCGBmrxUatro78dDdimoeXnF4vXvVuGECXHRfNYQDTc"
+              },
+              {
+                "label": "Token Account",
+                "value": "6T8bwTHDrq7Dad4n91fJ8e4eEmsytuLdEdsDn7W2jYyy"
+              },
+              {
+                "label": "Wallet",
+                "value": "BdCGBmrxUatro78dDdimoeXnF4vXvVuGECXHRfNYQDTc"
+              },
+              {
+                "label": "Mint",
+                "value": "ngwxpGYdkauMcxLFrNTKp8qBgK7JV53zVvd7F2spump"
+              },
+              {
+                "label": "Token Program",
+                "value": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+              }
+            ],
+            "intent": "Create associated token account",
+            "interpolatedIntent": "Create the associated token account of BdCGBmrxUatro78dDdimoeXnF4vXvVuGECXHRfNYQDTc for mint ngwxpGYdkauMcxLFrNTKp8qBgK7JV53zVvd7F2spump"
+          },
+          "program": "ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL"
+        },
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "Discriminator",
+                "value": "0xbb64facc31c4af14"
+              },
+              {
+                "label": "In Amount",
+                "value": "200000000"
+              },
+              {
+                "label": "Quoted Out Amount",
+                "value": "71961834875"
+              },
+              {
+                "label": "Slippage Bps",
+                "value": "1500"
+              },
+              {
+                "label": "Platform Fee Bps",
+                "value": "0"
+              },
+              {
+                "label": "Positive Slippage Bps",
+                "value": "0"
+              },
+              {
+                "label": "Route Plan",
+                "value": "(Swap: Pump Swap Buy V4 (Close User Volume Accumulator: false), Bps: 10000, Input Index: 0, Output Index: 1)"
+              },
+              {
+                "label": "User Transfer Authority",
+                "value": "BdCGBmrxUatro78dDdimoeXnF4vXvVuGECXHRfNYQDTc"
+              },
+              {
+                "label": "User Source Token Account",
+                "value": "HE6WiNv56FizLbSE34CvHbLwkpWicpUegSNcbtu54q1A"
+              },
+              {
+                "label": "User Destination Token Account",
+                "value": "6T8bwTHDrq7Dad4n91fJ8e4eEmsytuLdEdsDn7W2jYyy"
+              },
+              {
+                "label": "Source Mint",
+                "value": "So11111111111111111111111111111111111111112"
+              },
+              {
+                "label": "Destination Mint",
+                "value": "ngwxpGYdkauMcxLFrNTKp8qBgK7JV53zVvd7F2spump"
+              },
+              {
+                "label": "Source Token Program",
+                "value": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+              },
+              {
+                "label": "Destination Token Program",
+                "value": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+              },
+              {
+                "label": "Event Authority",
+                "value": "D8cy77BBepLMngZx6ZukaTff5hCt1HrWyKk3Hnd9oitf"
+              },
+              {
+                "label": "Program",
+                "value": "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4"
+              },
+              {
+                "label": "Remaining Account #1",
+                "value": "pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA"
+              },
+              {
+                "label": "Remaining Account #2",
+                "value": "3iGr3kuNGVheD9HAdx4hc4y9PhhJuNCi2GawTpT2jra6"
+              },
+              {
+                "label": "Remaining Account #3",
+                "value": "BdCGBmrxUatro78dDdimoeXnF4vXvVuGECXHRfNYQDTc"
+              },
+              {
+                "label": "Remaining Account #4",
+                "value": "ADyA8hdefvWN2dbGGWFotbzWxrAvLW83WG6QCVXvJKqw"
+              },
+              {
+                "label": "Remaining Account #5",
+                "value": "ngwxpGYdkauMcxLFrNTKp8qBgK7JV53zVvd7F2spump"
+              },
+              {
+                "label": "Remaining Account #6",
+                "value": "So11111111111111111111111111111111111111112"
+              },
+              {
+                "label": "Remaining Account #7",
+                "value": "6T8bwTHDrq7Dad4n91fJ8e4eEmsytuLdEdsDn7W2jYyy"
+              },
+              {
+                "label": "Remaining Account #8",
+                "value": "HE6WiNv56FizLbSE34CvHbLwkpWicpUegSNcbtu54q1A"
+              },
+              {
+                "label": "Remaining Account #9",
+                "value": "Di8jmfmm5vYTc93UAR568GxzKvdrwcpqNxDdmLNSJJ2E"
+              },
+              {
+                "label": "Remaining Account #10",
+                "value": "3rkBHk4zrnBH7NpcK99TNTVr1aafX73RkCARtgLnPu3a"
+              },
+              {
+                "label": "Remaining Account #11",
+                "value": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+              },
+              {
+                "label": "Remaining Account #12",
+                "value": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+              },
+              {
+                "label": "Remaining Account #13",
+                "value": "11111111111111111111111111111111"
+              },
+              {
+                "label": "Remaining Account #14",
+                "value": "BcDi4fXsnWMmVvPuCBBiAeUXTaoQy78zqgrPmjXt1dEu"
+              },
+              {
+                "label": "Remaining Account #15",
+                "value": "5PHirr8joyTMp9JMm6nW7hNDVyEYdkzDqazxPD7RaTjx"
+              },
+              {
+                "label": "Remaining Account #16",
+                "value": "6rVkF4HSgy1jrnC3HogfRgPHrq4CtLg5f11URpsC4i9D"
+              },
+              {
+                "label": "Remaining Account #17",
+                "value": "GS4CU59F31iL7aR2Q8zVS8DRrcRnXX1yjQ66TqNVQnaR"
+              },
+              {
+                "label": "Remaining Account #18",
+                "value": "pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA"
+              },
+              {
+                "label": "Remaining Account #19",
+                "value": "BdCGBmrxUatro78dDdimoeXnF4vXvVuGECXHRfNYQDTc"
+              },
+              {
+                "label": "Remaining Account #20",
+                "value": "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4"
+              }
+            ],
+            "intent": "Route V2",
+            "interpolatedIntent": null
+          },
+          "program": "JUP6LkbZbjS1jKKwapdHNy74zcZ3tLUZoi5QNyVTaV4"
+        },
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "Token Account",
+                "value": "HE6WiNv56FizLbSE34CvHbLwkpWicpUegSNcbtu54q1A"
+              },
+              {
+                "label": "Recipient",
+                "value": "BdCGBmrxUatro78dDdimoeXnF4vXvVuGECXHRfNYQDTc"
+              },
+              {
+                "label": "Owner",
+                "value": "BdCGBmrxUatro78dDdimoeXnF4vXvVuGECXHRfNYQDTc"
+              }
+            ],
+            "intent": "Close token account",
+            "interpolatedIntent": "Close HE6WiNv56FizLbSE34CvHbLwkpWicpUegSNcbtu54q1A and send its balance to BdCGBmrxUatro78dDdimoeXnF4vXvVuGECXHRfNYQDTc"
+          },
+          "program": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        },
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "Amount",
+                "value": "0.0016 SOL"
+              },
+              {
+                "label": "From",
+                "value": "BdCGBmrxUatro78dDdimoeXnF4vXvVuGECXHRfNYQDTc"
+              },
+              {
+                "label": "To",
+                "value": "HR6xhpJYYiTvmAtUZvpLMN7qbr6TxCw1Sgq3fab8vCoa"
+              }
+            ],
+            "intent": "Transfer SOL",
+            "interpolatedIntent": "Transfer 0.0016 SOL from BdCGBmrxUatro78dDdimoeXnF4vXvVuGECXHRfNYQDTc to HR6xhpJYYiTvmAtUZvpLMN7qbr6TxCw1Sgq3fab8vCoa"
+          },
+          "program": "11111111111111111111111111111111"
+        },
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "Amount",
+                "value": "0.0004 SOL"
+              },
+              {
+                "label": "From",
+                "value": "BdCGBmrxUatro78dDdimoeXnF4vXvVuGECXHRfNYQDTc"
+              },
+              {
+                "label": "To",
+                "value": "6GWuvrdRP3b2RStBZx3YmADJ5Rd4BCgP39rPrQVWSEhR"
+              }
+            ],
+            "intent": "Transfer SOL",
+            "interpolatedIntent": "Transfer 0.0004 SOL from BdCGBmrxUatro78dDdimoeXnF4vXvVuGECXHRfNYQDTc to 6GWuvrdRP3b2RStBZx3YmADJ5Rd4BCgP39rPrQVWSEhR"
+          },
+          "program": "11111111111111111111111111111111"
+        }
+      ]
+    },
+    "advisories": [
+      {
+        "detail": "this v1 transaction sets its fee in the message header, which no instruction shows: priority fee 0.000012605 SOL, compute unit limit 229149",
+        "kind": "header-fee"
+      }
+    ]
+  },
+  "id": "jupiter-swap-v1",
+  "idls": [
+    "official/compute-budget.json",
+    "official/associated-token-account.json",
+    "official/system.json",
+    "official/token.json",
+    "anchor/jupiter.json"
+  ],
+  "message": "gQEADA8AAAD3tiJefH2gSSu8+swVd82k85KRQssmYM1WR/AzMFhGJAgWndqDHdxcpT8Hlh9vxuie5WmfgYbY+85T/Qexkx5Wgd8oShqPsejGT2IsTBiuTOy6Ido9KQ2rzGIdJilbfxcwAyp1p4IXL7SuqRentF5eNyhvELGXcfRZOezE2qQT9cNFTkP4EPJlVxKB5jcJD11cAuxkWVztH+b7AZ81G9tSzHRW+GWgoikSCo3jGK4QQi6HdGtNjsZ3ljzCKm9liOHAyFD8IbiG4LkUL0hwQ38HjxMGrIGWlXPH3fThx+OVJGUEnZqRCTG7oMi/cMC3mcxSWwa9Bnc2NXYjz/zcvbk9T6a81c4VUf+Z2VRwzED4t1FqG5TdEi2sh+97IzTjSMrtw/EVxiyNVPnYdwPbka43upArnA/gAh26XcaNIgVdTtLB8+ercSZHrOmyq2AJJ2pQVovbBfQRF3LHRxK5IvyTg1EAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEEkbsx9eP6B5BdzpGllQZk3kjoHZEeX328+tRRCYBDLiQumRP4fVaoZ8RzS0uwU0yM7bgpL6u73K2mFjiHhcNaMlyWPTiSJ8bs9ECkUjg2DC1oTmdr/EIQEjnvY2+n4WbQ/+if11/ZKdMCbHylYed5LCas238ndUUsyGqezjOXo5UpwlSiDn2HAubhgeYkcE5IW5Hpxti+3O+xyFpRYdF4EedVb8jHAbu50xW7OaBUH/bGy3qP0jlECsc2iVrwTjwu0TipVhDCuuDQEKIPfLyvPvWWd7RX2oTWbYCCuL5oPDBTe/IJexnaUJQgYu2VAZfQpjTFW1XG01PgJDBjpqGMGm4hX/quBhPtof2NGGMA12sQ53BrrO1WYoPAAAAAAAQbd9uHXZaGT2cvhRs7reawctIXtX1s3kTqM9YV+/wCpBt324e51j94YQl285GzN2rYa/E2DuQ0n/r35KNihi/w9MQAAAAAAAB1/AwAAAAAEDQYBAAoCDAAUAQEADQYBABAeKAAUAwEACgIMAAoCDAAACAATChQBAAgCAAAAAMLrCwAAAAAIEQAFABEKFQEACAUTERQVEA4QEgEADBETBQgHAhUUCgYLBA8SABC7ZPrMMcSvFADC6wsAAAAAe3VCwRAAAADcBQAAAAABAAAAwQAQJwABCAAACQAJAgAAAABqGAAAAAAAAAMCAAAAgBoGAAAAAAA=",
+  "notes": [
+    "A Mainnet transaction as signed, in the v1 format of SIMD-0385: no lookup tables, no compute budget instructions, and the priority fee and compute limit in a config in the header. Of 1,916 non-vote transactions in six Mainnet blocks on 2026-11-21, 940 were v1.",
+    "An instruction display, Codama's included, works one instruction at a time, so it never sees the fee of a v1 transaction: a wallet has to read the header for it.",
+    "After the swap, two SOL transfers (0.0016 and 0.0004 SOL) go to addresses the swap does not use, most likely the fees of the app that built it. They display as plain transfers."
+  ],
+  "source": {
+    "network": "mainnet",
+    "signature": "65h1ZSTZooQPzd9msTFGFNESJhWZNQZJvgbPzB3W3egD3aWUZ9WskK6XEzHh9kmhUQGvb94cgvFNzxVCjVKrWat",
+    "slot": 472230419
+  },
+  "title": "A real Jupiter swap in a v1 transaction (SIMD-0385): the fee is in the header"
+}

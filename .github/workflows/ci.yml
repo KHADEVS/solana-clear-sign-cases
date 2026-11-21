@@ -24,8 +24,9 @@ jobs:
         run: cargo clippy --all-targets --locked -- -D warnings
       - name: Tests
         run: cargo test --locked
-      - name: The cases rebuild exactly as committed
+      - name: The converted Anchor IDLs and the cases rebuild exactly as committed
         run: |
+          node tools/codama/from-anchor.mjs
           cargo run --locked --bin gen
           node tools/codama/generate.mjs
           git diff --exit-code -- cases idl

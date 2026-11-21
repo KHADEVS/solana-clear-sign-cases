@@ -316,8 +316,8 @@
         "kind": "co-signed"
       },
       {
-        "detail": "\"Transfer SOL\" also passes an account its description does not list: trfb5...J6aWg",
-        "kind": "extra-accounts"
+        "detail": "\"Transfer SOL\" also passes a signer its description does not list: trfb5...J6aWg",
+        "kind": "extra-signers"
       }
     ]
   },

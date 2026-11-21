@@ -127,11 +127,17 @@ impl Programs {
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum V {
+    /// A number's bits, little end first in the data; signed numbers keep
+    /// their two's complement bits.
     Int(u128),
+    Bool(bool),
     Str(String),
     Bytes(Vec<u8>),
     Key(Key),
     None,
+    List(Vec<V>),
+    Struct(Vec<(String, V)>),
+    Variant(String, Box<V>),
 }
 
 /// An instruction matched against its IDL node.
@@ -160,12 +166,31 @@ fn kind(node: &Value) -> &str {
 
 fn number_width(ty: &Value) -> Result<usize, String> {
     match ty["format"].as_str() {
-        Some("u8") => Ok(1),
-        Some("u16") => Ok(2),
-        Some("u32") => Ok(4),
-        Some("u64") => Ok(8),
-        Some("u128") => Ok(16),
+        Some("u8" | "i8") => Ok(1),
+        Some("u16" | "i16") => Ok(2),
+        Some("u32" | "i32" | "f32") => Ok(4),
+        Some("u64" | "i64" | "f64") => Ok(8),
+        Some("u128" | "i128") => Ok(16),
         other => Err(format!("number format {other:?} not supported yet")),
+    }
+}
+
+/// How deep defined types may nest: a type that refers to itself is refused
+/// rather than followed forever.
+const MAX_TYPE_DEPTH: usize = 32;
+
+/// The program whose `definedTypes` links point to.
+struct Types<'a> {
+    program: &'a Value,
+}
+
+impl Types<'_> {
+    fn defined(&self, name: &str) -> Result<&Value, String> {
+        self.program["definedTypes"]
+            .as_array()
+            .and_then(|types| types.iter().find(|t| t["name"] == name))
+            .map(|t| &t["type"])
+            .ok_or_else(|| format!("defined type {name} not found"))
     }
 }
 
@@ -179,49 +204,166 @@ fn take<'d>(data: &'d [u8], pos: &mut usize, n: usize) -> Result<&'d [u8], Strin
     Ok(out)
 }
 
-fn read(ty: &Value, data: &[u8], pos: &mut usize) -> Result<V, String> {
+fn u8_node() -> Value {
+    serde_json::json!({ "kind": "numberTypeNode", "format": "u8", "endian": "le" })
+}
+
+fn read_number(ty: &Value, data: &[u8], pos: &mut usize) -> Result<u128, String> {
+    let bytes = take(data, pos, number_width(ty)?)?;
+    let little = ty["endian"].as_str() != Some("be");
+    let fold = |acc: u128, b: &u8| (acc << 8) | *b as u128;
+    Ok(if little {
+        bytes.iter().rev().fold(0, fold)
+    } else {
+        bytes.iter().fold(0, fold)
+    })
+}
+
+/// A count or a tag as a number, from the node that encodes it.
+fn read_count(ty: &Value, data: &[u8], pos: &mut usize) -> Result<usize, String> {
+    let n = read_number(ty, data, pos)?;
+    usize::try_from(n).map_err(|_| "a count does not fit".to_string())
+}
+
+fn read(
+    ty: &Value,
+    data: &[u8],
+    pos: &mut usize,
+    types: &Types,
+    depth: usize,
+) -> Result<V, String> {
+    if depth > MAX_TYPE_DEPTH {
+        return Err("types nested too deep".into());
+    }
+    let next = depth + 1;
     match kind(ty) {
-        "numberTypeNode" => {
-            let bytes = take(data, pos, number_width(ty)?)?;
-            Ok(V::Int(
-                bytes
-                    .iter()
-                    .rev()
-                    .fold(0u128, |acc, b| (acc << 8) | *b as u128),
-            ))
+        "numberTypeNode" => Ok(V::Int(read_number(ty, data, pos)?)),
+        "booleanTypeNode" => {
+            let size = ty.get("size").cloned().unwrap_or_else(u8_node);
+            match read_number(&size, data, pos)? {
+                0 => Ok(V::Bool(false)),
+                1 => Ok(V::Bool(true)),
+                other => Err(format!("a boolean is {other}")),
+            }
         }
         "publicKeyTypeNode" => Ok(V::Key(take(data, pos, 32)?.try_into().expect("32"))),
         "optionTypeNode" => {
-            let default_prefix = serde_json::json!({ "kind": "numberTypeNode", "format": "u8" });
-            let prefix = ty.get("prefix").unwrap_or(&default_prefix);
-            match read(prefix, data, pos)? {
-                V::Int(0) => Ok(V::None),
-                V::Int(1) => read(&ty["item"], data, pos),
-                other => Err(format!("bad option tag {other:?}")),
+            let prefix = ty.get("prefix").cloned().unwrap_or_else(u8_node);
+            match read_number(&prefix, data, pos)? {
+                0 => Ok(V::None),
+                1 => read(&ty["item"], data, pos, types, next),
+                other => Err(format!("bad option tag {other}")),
             }
         }
         "sizePrefixTypeNode" => {
-            let V::Int(len) = read(&ty["prefix"], data, pos)? else {
-                return Err("size prefix is not a number".into());
-            };
-            read_sized(&ty["type"], data, pos, len as usize)
+            let len = read_count(&ty["prefix"], data, pos)?;
+            read_sized(&ty["type"], data, pos, len, types, next)
         }
         "fixedSizeTypeNode" => {
             let size = ty["size"].as_u64().ok_or("fixed size without size")? as usize;
-            read_sized(&ty["type"], data, pos, size)
+            read_sized(&ty["type"], data, pos, size, types, next)
+        }
+        // Bare bytes and strings take the rest of the data.
+        "bytesTypeNode" | "stringTypeNode" => {
+            let len = data.len() - *pos;
+            read_sized(ty, data, pos, len, types, next)
+        }
+        "structTypeNode" => {
+            let mut fields = Vec::new();
+            for field in ty["fields"].as_array().ok_or("struct without fields")? {
+                let name = field["name"].as_str().unwrap_or("?").to_string();
+                fields.push((name, read(&field["type"], data, pos, types, next)?));
+            }
+            Ok(V::Struct(fields))
+        }
+        "tupleTypeNode" => {
+            let mut items = Vec::new();
+            for item in ty["items"].as_array().ok_or("tuple without items")? {
+                items.push(read(item, data, pos, types, next)?);
+            }
+            Ok(V::List(items))
+        }
+        "arrayTypeNode" => {
+            let count = &ty["count"];
+            let n = match kind(count) {
+                "prefixedCountNode" => Some(read_count(&count["prefix"], data, pos)?),
+                "fixedCountNode" => Some(count["value"].as_u64().ok_or("fixed count")? as usize),
+                "remainderCountNode" => None,
+                other => return Err(format!("array count {other} not supported yet")),
+            };
+            let mut items = Vec::new();
+            match n {
+                Some(n) => {
+                    // Every item takes at least a byte here: a count past the
+                    // data is refused before allocating for it.
+                    if n > data.len() - *pos {
+                        return Err(format!(
+                            "an array of {n} items in {} bytes",
+                            data.len() - *pos
+                        ));
+                    }
+                    for _ in 0..n {
+                        items.push(read(&ty["item"], data, pos, types, next)?);
+                    }
+                }
+                None => {
+                    while *pos < data.len() {
+                        items.push(read(&ty["item"], data, pos, types, next)?);
+                    }
+                }
+            }
+            Ok(V::List(items))
+        }
+        "enumTypeNode" => {
+            let size = ty.get("size").cloned().unwrap_or_else(u8_node);
+            let tag = read_count(&size, data, pos)?;
+            let variant = ty["variants"]
+                .as_array()
+                .and_then(|v| v.get(tag))
+                .ok_or_else(|| format!("enum tag {tag} names no variant"))?;
+            let name = variant["name"].as_str().unwrap_or("?").to_string();
+            let value = match kind(variant) {
+                "enumEmptyVariantTypeNode" => V::None,
+                "enumStructVariantTypeNode" => read(&variant["struct"], data, pos, types, next)?,
+                "enumTupleVariantTypeNode" => read(&variant["tuple"], data, pos, types, next)?,
+                other => return Err(format!("enum variant {other} not supported yet")),
+            };
+            Ok(V::Variant(name, Box::new(value)))
+        }
+        "definedTypeLinkNode" => {
+            let name = ty["name"].as_str().ok_or("type link without name")?;
+            read(types.defined(name)?, data, pos, types, next)
         }
         other => Err(format!("type {other} not supported yet")),
     }
 }
 
-fn read_sized(ty: &Value, data: &[u8], pos: &mut usize, len: usize) -> Result<V, String> {
+fn read_sized(
+    ty: &Value,
+    data: &[u8],
+    pos: &mut usize,
+    len: usize,
+    types: &Types,
+    depth: usize,
+) -> Result<V, String> {
     let bytes = take(data, pos, len)?;
     match kind(ty) {
         "stringTypeNode" => Ok(V::Str(
             String::from_utf8(bytes.to_vec()).map_err(|_| "a string is not valid UTF-8")?,
         )),
         "bytesTypeNode" => Ok(V::Bytes(bytes.to_vec())),
-        other => Err(format!("sized type {other} not supported yet")),
+        // Any other type inside a sized window must fill it exactly.
+        _ => {
+            let mut inner = 0;
+            let value = read(ty, bytes, &mut inner, types, depth)?;
+            if inner != bytes.len() {
+                return Err(format!(
+                    "{} bytes left in a sized value",
+                    bytes.len() - inner
+                ));
+            }
+            Ok(value)
+        }
     }
 }
 
@@ -320,11 +462,12 @@ pub fn decode<'a>(programs: &'a Programs, ix: &Instruction) -> Result<Option<Dec
         .collect();
     let mut args = Vec::new();
     let mut pos = 0;
+    let types = Types { program };
     for arg in node["arguments"]
         .as_array()
         .ok_or("instruction without arguments")?
     {
-        args.push((arg, read(&arg["type"], &ix.data, &mut pos)?));
+        args.push((arg, read(&arg["type"], &ix.data, &mut pos, &types, 0)?));
     }
     // Bytes no argument accounts for could carry anything: refuse them
     // rather than show a reading that leaves part of the data out.

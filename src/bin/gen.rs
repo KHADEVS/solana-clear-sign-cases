@@ -4,9 +4,13 @@
 //! which are ours and not normative, are written here by hand.
 
 use base64::Engine;
-use clear_sign_cases::message::{compile_legacy, compile_v0, AccountMeta, NewInstruction};
+use clear_sign_cases::message::{
+    compile_legacy, compile_v0, compile_v1, decode as decode_message, AccountMeta,
+    CompiledInstruction, Config, NewInstruction,
+};
 use clear_sign_cases::util::{anchor_discriminator, b58, find_pda, from_b58, short, test_key, Key};
 use serde_json::{json, Value};
+use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
 fn key(text: &str) -> Key {
@@ -286,9 +290,9 @@ fn trezor_6843(root: &Path) -> Value {
             )
         ),
         advisory(
-            "extra-accounts",
+            "extra-signers",
             format!(
-                "\"Transfer SOL\" also passes an account its description does not list: {}",
+                "\"Transfer SOL\" also passes a signer its description does not list: {}",
                 short(&co_signer)
             )
         )
@@ -542,6 +546,216 @@ fn lying_metadata(ids: &Ids, root: &Path) -> Value {
     case
 }
 
+/// A real Mainnet transaction saved under `real/`: the message that was
+/// signed, the lookup tables it loads, and where it comes from.
+struct Real {
+    message: Vec<u8>,
+    tables: Value,
+    signature: String,
+    slot: u64,
+}
+
+fn real(root: &Path, name: &str) -> Real {
+    let text = std::fs::read_to_string(root.join("real").join(name)).expect("real transaction");
+    let json: Value = serde_json::from_str(&text).expect("real transaction json");
+    Real {
+        message: base64::engine::general_purpose::STANDARD
+            .decode(json["message"].as_str().expect("message"))
+            .expect("base64"),
+        tables: json["lookupTables"].clone(),
+        signature: json["signature"].as_str().expect("signature").to_string(),
+        slot: json["slot"].as_u64().expect("slot"),
+    }
+}
+
+fn real_case(id: &str, title: &str, class: &str, idls: &[&str], real: &Real) -> Value {
+    let mut case = base_case(id, title, class, idls, &real.message);
+    if real.tables.as_object().is_some_and(|t| !t.is_empty()) {
+        case["lookupTables"] = real.tables.clone();
+    }
+    case["source"] =
+        json!({ "network": "mainnet", "signature": real.signature, "slot": real.slot });
+    case
+}
+
+const SWAP_IDLS: &[&str] = &[
+    "official/compute-budget.json",
+    "official/associated-token-account.json",
+    "official/system.json",
+    "official/token.json",
+    "anchor/jupiter.json",
+];
+
+fn jupiter_swap_wrap_sol(root: &Path) -> Value {
+    let tx = real(root, "jupiter-swap-wrap-sol.json");
+    let mut case = real_case(
+        "jupiter-swap-wrap-sol",
+        "A real Jupiter swap: wrap SOL, route it into a token, close the wrapped account",
+        "ordinary",
+        SWAP_IDLS,
+        &tx,
+    );
+    case["notes"] = json!([
+        "A Mainnet transaction as signed (v0, one lookup table). Eight instructions, two of them the swap itself: compute budget, account creation, wrapping and closing make up the rest.",
+        "Jupiter publishes an Anchor IDL with no display metadata. Converted with Codama's own converter (@codama/nodes-from-anchor), the route shows as \"Route V2\" with raw fields: the discriminator itself as the first field, amounts in base units with no mint, and the route plan as JSON (1.0.0) or as labeled values (2.0.0-rc.0). Which token is bought is in the account creation before it, not in the swap's display.",
+        "The setup instructions are displayed one by one and correctly: they are what a summary would hide, which is what jupiter-swap-owner-change uses."
+    ]);
+    case
+}
+
+fn jupiter_swap_v1(root: &Path) -> Value {
+    let tx = real(root, "jupiter-swap-v1.json");
+    let mut case = real_case(
+        "jupiter-swap-v1",
+        "A real Jupiter swap in a v1 transaction (SIMD-0385): the fee is in the header",
+        "ordinary",
+        SWAP_IDLS,
+        &tx,
+    );
+    case["expected"]["advisories"] = json!([advisory(
+        "header-fee",
+        "this v1 transaction sets its fee in the message header, which no instruction shows: priority fee 0.000012605 SOL, compute unit limit 229149".into()
+    )]);
+    case["notes"] = json!([
+        "A Mainnet transaction as signed, in the v1 format of SIMD-0385: no lookup tables, no compute budget instructions, and the priority fee and compute limit in a config in the header. Of 1,916 non-vote transactions in six Mainnet blocks on 2026-11-21, 940 were v1.",
+        "An instruction display, Codama's included, works one instruction at a time, so it never sees the fee of a v1 transaction: a wallet has to read the header for it.",
+        "After the swap, two SOL transfers (0.0016 and 0.0004 SOL) go to addresses the swap does not use, most likely the fees of the app that built it. They display as plain transfers."
+    ]);
+    case
+}
+
+fn native_stake_delegate(root: &Path) -> Value {
+    let tx = real(root, "native-stake-delegate.json");
+    let mut case = real_case(
+        "native-stake-delegate",
+        "A real stake delegation: create a stake account with a seed, initialize it, delegate it",
+        "ordinary",
+        &[
+            "official/compute-budget.json",
+            "official/system.json",
+            "official/stake.json",
+        ],
+        &tx,
+    );
+    case["expected"]["advisories"] = json!([advisory(
+        "older-account-list",
+        "\"Delegate stake\" uses the older account list, with the Clock sysvar as account 3, which the IDL does not describe: its account labels from account 3 on do not match these accounts".into()
+    )]);
+    case["notes"] = json!([
+        "A Mainnet transaction as signed (legacy): 145.6 SOL into a new stake account, delegated to a validator.",
+        "The stake program accepts two account lists for DelegateStake: the older one (stake, vote, Clock, stake history, config, then the authority) and a newer one (stake, vote, authority). It tells them apart by the Clock sysvar in third place (process_delegate in program/src/processor.rs). The official IDL describes only the newer list, so on this transaction Codama's display labels the Clock sysvar \"Stake Authority\". Authorize, Withdraw, Deactivate and Merge have the same two lists.",
+        "Nothing here moves funds where the display does not say, and the program checks every signer whatever the list; only the labels are wrong."
+    ]);
+    case
+}
+
+/// The real Jupiter swap with one instruction added at the end: SPL Token
+/// SetAuthority, AccountOwner, on the token account the swap fills.
+fn jupiter_swap_owner_change(ids: &Ids, root: &Path) -> Value {
+    let tx = real(root, "jupiter-swap-wrap-sol.json");
+    let mut message = decode_message(&tx.message).expect("real message");
+    let mut tables: HashMap<Key, Vec<Key>> = HashMap::new();
+    for (table, addresses) in tx.tables.as_object().expect("tables") {
+        let addresses = addresses
+            .as_array()
+            .expect("addresses")
+            .iter()
+            .map(|a| key(a.as_str().expect("address")))
+            .collect();
+        tables.insert(key(table), addresses);
+    }
+    let all = message.all_keys(&tables).expect("keys");
+    let resolved = message.resolve(&tables).expect("instructions");
+    let user = message.keys[0];
+    // The token account the swap fills: the one the second account creation makes.
+    let creations: Vec<_> = resolved.iter().filter(|ix| ix.program == ids.ata).collect();
+    let bought = creations[1].accounts[1];
+    let mint = creations[1].accounts[3];
+    let index = |k: &Key| all.iter().position(|a| a == k).expect("key in message") as u8;
+    let drainer = test_key("drainer");
+    let mut data = vec![6, 2, 1];
+    data.extend(drainer);
+    message.instructions.push(CompiledInstruction {
+        program: index(&ids.token),
+        accounts: vec![index(&bought), index(&user)],
+        data,
+    });
+    let mut case = base_case(
+        "jupiter-swap-owner-change",
+        "The real Jupiter swap with one more instruction: the token account it fills changes owner",
+        "adversarial",
+        SWAP_IDLS,
+        &message.encode().expect("encode"),
+    );
+    case["lookupTables"] = tx.tables.clone();
+    case["context"] = json!({
+        "names": { b58(&user): "the signer" },
+        "tokenAccounts": { b58(&bought): { "owner": b58(&user), "mint": b58(&mint) } }
+    });
+    case["expected"]["advisories"] = json!([advisory(
+        "authority-change",
+        format!(
+            "the owner of the signer's token account goes to {}",
+            short(&drainer)
+        )
+    )]);
+    case["notes"] = json!([
+        format!("Built from the real swap of jupiter-swap-wrap-sol ({}), with one instruction added at the end: SPL Token SetAuthority, AccountOwner, on the token account the swap fills. The swap still runs, and the tokens it buys belong to the new owner. The original signature does not cover this message.", tx.signature),
+        "Codama's display shows the ninth instruction correctly. A wallet that sums up a swap in one line and folds the setup instructions away folds this one too: every instruction has to be accounted for, not only the swap."
+    ]);
+    case
+}
+
+/// A v1 transaction whose compute budget instructions ask for 1
+/// micro-lamport per unit, while its header pays a priority fee of 0.5 SOL.
+fn v1_decoy_compute_budget(ids: &Ids) -> Value {
+    let alice = test_key("alice");
+    let bob = test_key("bob");
+    let mut limit = vec![2];
+    limit.extend(200_000u32.to_le_bytes());
+    let mut price = vec![3];
+    price.extend(1u64.to_le_bytes());
+    let budget = |data: Vec<u8>| NewInstruction {
+        program: ids.compute_budget,
+        accounts: vec![],
+        data,
+    };
+    let ixs = [
+        budget(limit),
+        budget(price),
+        system_transfer(ids, alice, bob, 10_000_000),
+    ];
+    let config = Config {
+        priority_fee: 500_000_000,
+        compute_unit_limit: Some(200_000),
+        loaded_accounts_data_size_limit: None,
+        heap_size: None,
+    };
+    let mut case = base_case(
+        "v1-decoy-compute-budget",
+        "A v1 transaction whose compute budget instructions say 1 micro-lamport per unit, while its header pays 0.5 SOL",
+        "adversarial",
+        &["official/compute-budget.json", "official/system.json"],
+        &compile_v1(alice, &ixs, test_key("blockhash 11"), &config),
+    );
+    case["expected"]["advisories"] = json!([
+        advisory(
+            "header-fee",
+            "this v1 transaction sets its fee in the message header, which no instruction shows: priority fee 0.5 SOL, compute unit limit 200000".into()
+        ),
+        advisory(
+            "ignored-compute-budget",
+            "2 compute budget instructions in this v1 transaction are ignored for the fee and the limits: a fee worked out from them is not the fee paid".into()
+        )
+    ]);
+    case["notes"] = json!([
+        "SIMD-0385: in a v1 transaction, compute budget instructions are ignored for the fee and the limits, and run as no-ops. The header's config sets them.",
+        "Here the instructions set 1 micro-lamport per unit, less than a lamport in all, and the display shows exactly that; the header pays 0.5 SOL. A wallet that works out the fee from the instructions, as legacy and v0 require, shows the decoy. Trezor's firmware reads the header for v1 (core/src/apps/solana/transaction, since 2026-10-21).",
+        "Real v1 transactions carry such instructions too: some apps add them out of habit (8 of 940 v1 transactions in the 2026-11-21 sample)."
+    ]);
+    case
+}
+
 fn main() {
     let root = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
     let ids = ids();
@@ -568,6 +782,11 @@ fn main() {
         v0_lookup_transfer(&ids),
         squads_nested_approval(&ids),
         lying_metadata(&ids, &root),
+        jupiter_swap_wrap_sol(&root),
+        jupiter_swap_v1(&root),
+        native_stake_delegate(&root),
+        jupiter_swap_owner_change(&ids, &root),
+        v1_decoy_compute_budget(&ids),
     ];
     let keep: Vec<String> = cases
         .iter()
