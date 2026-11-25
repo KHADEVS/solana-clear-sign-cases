@@ -272,6 +272,20 @@ impl Message {
         Ok(keys)
     }
 
+    /// For each instruction, whether each of its accounts signs the message.
+    /// Only the first static keys do; an address from a lookup table never does.
+    pub fn signer_flags(&self) -> Vec<Vec<bool>> {
+        self.instructions
+            .iter()
+            .map(|ix| {
+                ix.accounts
+                    .iter()
+                    .map(|i| *i < self.required_signatures)
+                    .collect()
+            })
+            .collect()
+    }
+
     pub fn resolve(&self, tables: &HashMap<Key, Vec<Key>>) -> Result<Vec<Instruction>, String> {
         let keys = self.all_keys(tables)?;
         let get = |i: u8| {

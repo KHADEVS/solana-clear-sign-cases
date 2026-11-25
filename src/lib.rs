@@ -4,5 +4,6 @@
 pub mod advise;
 pub mod case;
 pub mod decode;
+pub mod display;
 pub mod message;
 pub mod util;

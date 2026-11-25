@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   checks:
-    name: Cases, decoding, advisories and Codama's displays
+    name: Cases, probes, decoding, advisories and Codama's displays
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -34,3 +34,9 @@ jobs:
         run: cargo run --locked --bin check
       - name: Expected displays match Codama's output
         run: node tools/codama/generate.mjs --check
+      - name: The probes hold what Codama gives
+        run: node tools/codama/probes.mjs --check
+      - name: The Rust display against four Mainnet blocks
+        run: |
+          gunzip -k real/survey/instructions.jsonl.gz
+          cargo run --locked --release --bin compare

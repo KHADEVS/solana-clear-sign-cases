@@ -1,0 +1,43 @@
+{
+ "blocks": [
+  {
+   "instructions": 1597,
+   "slot": 473648503,
+   "time": 1795588658,
+   "transactions": 348
+  },
+  {
+   "instructions": 1169,
+   "slot": 473637703,
+   "time": 1795586334,
+   "transactions": 227
+  },
+  {
+   "instructions": 2651,
+   "slot": 473545903,
+   "time": 1795566617,
+   "transactions": 624
+  },
+  {
+   "instructions": 1018,
+   "slot": 473481103,
+   "time": 1795552698,
+   "transactions": 232
+  }
+ ],
+ "failedToParse": 0,
+ "transactions": 1431,
+ "votes": 28,
+ "accounts": 40,
+ "idls": [
+  "official/system.json",
+  "official/token.json",
+  "official/token-2022.json",
+  "official/associated-token-account.json",
+  "official/compute-budget.json",
+  "official/stake.json",
+  "official/memo.json",
+  "anchor/jupiter.json"
+ ],
+ "instructions": 6435
+}

@@ -6,6 +6,7 @@
 
 use crate::advise::advise;
 use crate::decode::{decode, Context, Programs};
+use crate::display::{Idls, Meta};
 use crate::message::{decode as decode_message, Config, Instruction};
 use crate::util::{from_b58, Key};
 use serde_json::Value;
@@ -22,6 +23,9 @@ pub struct Case {
     pub config: Option<Config>,
     pub programs: Programs,
     pub context: Context,
+    /// The same IDLs and instructions, for the display.
+    pub idls: Idls,
+    pub metas: Vec<Vec<Meta>>,
 }
 
 pub fn load(dir: &Path, idl_dir: &Path) -> Result<Case, String> {
@@ -47,6 +51,17 @@ pub fn load(dir: &Path, idl_dir: &Path) -> Result<Case, String> {
         }
     }
     let instructions = message.resolve(&tables)?;
+    let metas = instructions
+        .iter()
+        .zip(message.signer_flags())
+        .map(|(ix, signs)| {
+            ix.accounts
+                .iter()
+                .zip(signs)
+                .map(|(key, signer)| Meta { key: *key, signer })
+                .collect()
+        })
+        .collect();
     let signers = message.keys[..message.required_signatures as usize].to_vec();
     let mut idls = Vec::new();
     for name in json["idls"].as_array().ok_or("case without idls")? {
@@ -57,6 +72,8 @@ pub fn load(dir: &Path, idl_dir: &Path) -> Result<Case, String> {
     }
     Ok(Case {
         id: json["id"].as_str().unwrap_or("?").to_string(),
+        idls: Idls::new(idls.clone())?,
+        metas,
         programs: Programs::new(idls)?,
         context: Context::from_json(&json["context"])?,
         instructions,

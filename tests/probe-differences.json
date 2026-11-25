@@ -1,0 +1,40 @@
+{
+ "u16, big endian": {
+  "why": "The stable release reads every number low byte first, whatever its node says. The Rust display reads a big-endian number as one.",
+  "asTheReleaseCandidate": true,
+  "rust": { "fields": [{ "label": "Value", "value": "256" }], "intent": "Probe", "interpolatedIntent": null }
+ },
+ "u32, big endian": {
+  "why": "Same as for u16.",
+  "asTheReleaseCandidate": true,
+  "rust": { "fields": [{ "label": "Value", "value": "258" }], "intent": "Probe", "interpolatedIntent": null }
+ },
+ "u64, big endian": {
+  "why": "Same as for u16.",
+  "asTheReleaseCandidate": true,
+  "rust": { "fields": [{ "label": "Value", "value": "258" }], "intent": "Probe", "interpolatedIntent": null }
+ },
+ "i16, big endian, negative": {
+  "why": "Same as for u16.",
+  "asTheReleaseCandidate": true,
+  "rust": { "fields": [{ "label": "Value", "value": "-2" }], "intent": "Probe", "interpolatedIntent": null }
+ },
+ "a tag on two bytes, big endian": {
+  "why": "Same as for u16: the stable release writes the tag it looks for low byte first, and so does not find the instruction.",
+  "asTheReleaseCandidate": true,
+  "rust": { "fields": [{ "label": "Discriminator", "value": "258" }], "intent": "Wide", "interpolatedIntent": null }
+ },
+ "link to a type that holds itself": {
+  "why": "The stable release builds its decoder for a whole type before it reads anything, and never ends on a type that holds itself (a list node with an optional next node): it throws a stack overflow for every instruction that uses one. The Rust display reads the type as far as the data goes.",
+  "rust": { "fields": [{ "label": "Value", "value": "{\"value\":1,\"next\":{\"__option\":\"Some\",\"value\":{\"value\":2,\"next\":{\"__option\":\"None\"}}}}" }], "intent": "Probe", "interpolatedIntent": null }
+ },
+ "a display node of an unknown kind": {
+  "why": "On a number whose display node is of a kind it does not know, the stable release returns a field with a label and no value at all. The Rust display shows the number as it is.",
+  "asTheReleaseCandidate": true,
+  "rust": { "fields": [{ "label": "Value", "value": "1500" }], "intent": "Probe", "interpolatedIntent": null }
+ },
+ "names that are not in camel case": {
+  "why": "The stable release decodes arguments under their names turned to camel case and then looks them up under the names as written: an argument named any other way is shown with an empty value. The specification asks for camel case and does not say what to do otherwise. The Rust display shows the values.",
+  "rust": { "fields": [{ "label": "With Underscore", "value": "1" }, { "label": "H T T P Server", "value": "2" }, { "label": "Max Size", "value": "3" }, { "label": "Kebab Case", "value": "4" }], "intent": "Probe", "interpolatedIntent": null }
+ }
+}
