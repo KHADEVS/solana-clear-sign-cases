@@ -1,0 +1,99 @@
+{
+  "class": "ordinary",
+  "context": {
+    "names": {
+      "Ergrx3au6FfTPRqndTByRSMvE43bmmJ8gdEQcpsRJ1Ex": "alice.sol"
+    }
+  },
+  "expected": {
+    "display": {
+      "generator": "@codama/dynamic-instructions 1.0.0 (codama 1.11.0)",
+      "instructions": [
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "Amount",
+                "value": "5"
+              },
+              {
+                "label": "Token Account",
+                "value": "3ADmpQumyjiFUwEKPbwH2u9Fpx7v1mWBseURc3qQwtR3"
+              },
+              {
+                "label": "Mint",
+                "value": "BBmRiPr8c2tAVwT4p82R1YT9YSNzMxMSsdzaCQVEdvht"
+              },
+              {
+                "label": "Equality Record",
+                "value": "FiW3U37417EydgxhVnWVBpFUYQPRZ7YFUicZFsZbrMQ3"
+              },
+              {
+                "label": "Range Record",
+                "value": "Ergrx3au6FfTPRqndTByRSMvE43bmmJ8gdEQcpsRJ1Ex"
+              }
+            ],
+            "intent": "Withdraw confidential tokens",
+            "interpolatedIntent": "Withdraw 5 BBmRiPr8c2tAVwT4p82R1YT9YSNzMxMSsdzaCQVEdvht from the confidential balance of 3ADmpQumyjiFUwEKPbwH2u9Fpx7v1mWBseURc3qQwtR3"
+          },
+          "program": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        }
+      ]
+    },
+    "displayNext": {
+      "generator": "@codama/dynamic-instructions 2.0.0-rc.0 (codama 2.0.0-rc.0, IDLs upgraded by @codama/upgrade 2.0.0-rc.0)",
+      "instructions": [
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "Amount",
+                "value": "5"
+              },
+              {
+                "label": "Token Account",
+                "value": "3ADmpQumyjiFUwEKPbwH2u9Fpx7v1mWBseURc3qQwtR3"
+              },
+              {
+                "label": "Mint",
+                "value": "BBmRiPr8c2tAVwT4p82R1YT9YSNzMxMSsdzaCQVEdvht"
+              },
+              {
+                "label": "Unidentified Account #1",
+                "value": "HXTs3s8vDNRJkX9bJ4veEvaYLGeYqn4wfAgUy7RzPZGk"
+              },
+              {
+                "label": "Unidentified Account #2",
+                "value": "FiW3U37417EydgxhVnWVBpFUYQPRZ7YFUicZFsZbrMQ3"
+              },
+              {
+                "label": "Unidentified Account #3",
+                "value": "Ergrx3au6FfTPRqndTByRSMvE43bmmJ8gdEQcpsRJ1Ex"
+              }
+            ],
+            "intent": "Withdraw confidential tokens",
+            "interpolatedIntent": "Withdraw 5 BBmRiPr8c2tAVwT4p82R1YT9YSNzMxMSsdzaCQVEdvht from the confidential balance of 3ADmpQumyjiFUwEKPbwH2u9Fpx7v1mWBseURc3qQwtR3"
+          },
+          "program": "TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb"
+        }
+      ]
+    },
+    "advisories": [
+      {
+        "detail": "\"Withdraw confidential tokens\" leaves out 1 of the 6 accounts its description lists, and the IDL does not say which: from account 3 on, a label may sit on another account",
+        "kind": "omitted-accounts"
+      }
+    ]
+  },
+  "id": "confidential-withdraw-omitted-accounts",
+  "idls": [
+    "official/token-2022.json"
+  ],
+  "message": "AQAEBs3idfwptDsC2eDWoBgu17+JPs0EZYAr2jo2eEP8IIjRIBQLFPu7NccoFUMBFrsxrceaO1pNy9NhFcuG1bAu2H6XVuj8iyfh/MZu1cV5fa2Z5ba4+ixgfbREtjqr6zH05/WIygIfVzGA5Ni0jNxUd+PL6fllQ43mxHzjyyVpC62R2qVExHWM4YjV/HRC9EJ2ik1cFQ/Z2BULvA9+4x/Xc1AG3fbh7nWP3hhCXbzkbM3athr8TYO5DSf+vfko2KGL/Hge4Vl61b+SLxJZVutMV1ofhNaJAZVMpxY7lD+XH1D3AQUFAQIDBAAxGwZAS0wAAAAAAAYAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+  "notes": [
+    "With both proof offsets at 0, each proof waits in a context state account and the instructions sysvar is not passed: the notes of the official IDL say so. The accounts are the token account, the mint, the equality context, the range context and the authority.",
+    "The IDL marks the three accounts in the middle as optional, left out when absent. Codama 1.0.0 names accounts by position: it takes the equality context for the instructions sysvar, which is never shown, shows the range context as Equality Record and the authority as Range Record, and shows no Authority. The 2.0 release candidate names none of the accounts after the mint: Unidentified Account #1 to #3.",
+    "Which accounts are present follows from the two offsets in the data, and no node of the spec can say that. Six Token-2022 instructions are built this way: confidential transfer, transfer with fee, withdraw, mint, burn and permissioned burn."
+  ],
+  "title": "A Token-2022 confidential withdrawal whose proofs wait in context accounts"
+}

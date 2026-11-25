@@ -193,6 +193,32 @@ fn advise_one(
                 ));
             }
         }
+        // Optional accounts that are left out when absent, with a required
+        // account after them: a shorter list does not tell which ones are
+        // missing, and names given by position move onto other accounts.
+        // (A list made longer again by accounts after the named ones is not
+        // caught by its length.)
+        let named = decoded.node["accounts"]
+            .as_array()
+            .map_or(&[][..], Vec::as_slice);
+        let optional = |a: &serde_json::Value| a["isOptional"] == true;
+        if let Some(first) = named.iter().position(optional) {
+            if decoded.node["optionalAccountStrategy"] == "omitted"
+                && ix.accounts.len() < named.len()
+                && named[first..].iter().any(|a| !optional(a))
+            {
+                out.push(advisory(
+                    "omitted-accounts",
+                    format!(
+                        "\"{}\" leaves out {} of the {} accounts its description lists, and the IDL does not say which: from account {} on, a label may sit on another account",
+                        intent(decoded.node),
+                        named.len() - ix.accounts.len(),
+                        named.len(),
+                        first + 1
+                    ),
+                ));
+            }
+        }
         // Stake instructions keep an older account list, told apart by the
         // Clock sysvar in one position (stake program, processor.rs); the IDL
         // describes only the newer, shorter list.
@@ -266,6 +292,42 @@ fn advise_one(
                 "authority-change",
                 format!("{what} goes to {new}"),
             ));
+        }
+    }
+    // A Token Batch (tag 255) runs the instructions packed in its data, each
+    // with the next accounts of its list. The IDL gives them as bytes, so a
+    // display shows neither what they do nor which accounts they touch.
+    if is_token && ix.data.first() == Some(&255) {
+        match batched(ix) {
+            Ok(inner) => {
+                let what = inner
+                    .iter()
+                    .map(|inner_ix| describe(programs, inner_ix))
+                    .collect::<Vec<_>>()
+                    .join("; ");
+                out.push(advisory(
+                    "batched-instructions",
+                    format!(
+                        "{} instruction{} packed in one Batch instruction, which the display shows as bytes: {what}",
+                        inner.len(),
+                        if inner.len() == 1 { " is" } else { "s are" }
+                    ),
+                ));
+                for inner_ix in &inner {
+                    // The program refuses a batch inside a batch: nothing to read in it.
+                    if inner_ix.data.first() == Some(&255) {
+                        continue;
+                    }
+                    for mut found in advise_one(programs, inner_ix, ctx, ids, signers) {
+                        found.detail = format!("inside the batch: {}", found.detail);
+                        out.push(found);
+                    }
+                }
+            }
+            Err(e) => out.push(advisory(
+                "batched-instructions",
+                format!("a Batch instruction that does not read as one: {e}"),
+            )),
         }
     }
     if ix.program == ids.loader && u32_le(&ix.data) == Some(4) {
@@ -382,6 +444,41 @@ fn squads_approval(
     out
 }
 
+/// The instructions inside a Token Batch: for each one, a count of accounts,
+/// the length of its data, then the data (p-token, `process_batch`).
+fn batched(ix: &Instruction) -> Result<Vec<Instruction>, String> {
+    let mut out = Vec::new();
+    let (mut pos, mut next_account) = (1usize, 0usize);
+    while pos < ix.data.len() {
+        let (Some(&count), Some(&len)) = (ix.data.get(pos), ix.data.get(pos + 1)) else {
+            return Err("an instruction header is cut short".into());
+        };
+        let (count, len) = (count as usize, len as usize);
+        if len == 0 {
+            return Err("an instruction without data".into());
+        }
+        let data = ix
+            .data
+            .get(pos + 2..pos + 2 + len)
+            .ok_or("an instruction's data is cut short")?;
+        let accounts = ix
+            .accounts
+            .get(next_account..next_account + count)
+            .ok_or("fewer accounts than the instructions ask for")?;
+        out.push(Instruction {
+            program: ix.program,
+            accounts: accounts.to_vec(),
+            data: data.to_vec(),
+        });
+        pos += 2 + len;
+        next_account += count;
+    }
+    if out.is_empty() {
+        return Err("no instruction inside".into());
+    }
+    Ok(out)
+}
+
 /// An instruction node's display intent, or its name when it has no display
 /// metadata (IDLs converted from Anchor).
 fn intent(node: &serde_json::Value) -> &str {
@@ -455,4 +552,43 @@ fn vault_instructions(data: &[u8], multisig: &Key) -> Result<Vec<Instruction>, S
         return Err("address lookup tables in a vault transaction are not supported yet".into());
     }
     Ok(instructions)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn batch(data: &[u8], accounts: &[u8]) -> Instruction {
+        Instruction {
+            program: [9; 32],
+            accounts: accounts.iter().map(|n| [*n; 32]).collect(),
+            data: data.to_vec(),
+        }
+    }
+
+    #[test]
+    fn a_batch_gives_each_instruction_its_own_accounts() {
+        let inner = batched(&batch(&[255, 2, 1, 9, 1, 3, 7, 7, 7], &[1, 2, 3])).expect("a batch");
+        assert_eq!(inner.len(), 2);
+        assert_eq!(inner[0].accounts, vec![[1; 32], [2; 32]]);
+        assert_eq!(inner[0].data, vec![9]);
+        assert_eq!(inner[1].accounts, vec![[3; 32]]);
+        assert_eq!(inner[1].data, vec![7, 7, 7]);
+        assert_eq!(inner[1].program, [9; 32]);
+    }
+
+    #[test]
+    fn a_batch_the_program_refuses_is_not_read() {
+        let refused: [(&[u8], &[u8]); 6] = [
+            (&[255], &[]),                 // nothing inside
+            (&[255, 1], &[1]),             // a header cut short
+            (&[255, 1, 0], &[1]),          // an instruction without data
+            (&[255, 1, 2, 9], &[1]),       // data cut short
+            (&[255, 2, 1, 9], &[1]),       // fewer accounts than asked for
+            (&[255, 1, 1, 9, 1], &[1, 2]), // a second header cut short
+        ];
+        for (data, accounts) in refused {
+            assert!(batched(&batch(data, accounts)).is_err(), "{data:?}");
+        }
+    }
 }

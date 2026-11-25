@@ -13,7 +13,7 @@ import { getInstructionDisplay as displayNext } from 'dynamic-instructions-rc';
 import { createFromRoot as createNext } from 'codama-rc';
 import { upgradeFromJson } from 'codama-upgrade-rc';
 
-import { decodeMessage, displayInstructions, loadRoots, makeFetchAccount } from './display.mjs';
+import { byProgram, decodeMessage, displayInstructions, loadRoots, makeFetchAccount } from './display.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '../..');
@@ -24,11 +24,7 @@ const stable = `@codama/dynamic-instructions ${version('@codama/dynamic-instruct
 const next = `@codama/dynamic-instructions ${version('dynamic-instructions-rc')} (codama ${version('codama-rc')}, IDLs upgraded by @codama/upgrade ${version('codama-upgrade-rc')})`;
 
 async function displaysNext(instructions, idlTexts, fetchAccount) {
-    const roots = new Map();
-    for (const text of idlTexts) {
-        const node = createNext(upgradeFromJson(text)).getRoot();
-        roots.set(node.program.publicKey, node);
-    }
+    const roots = byProgram(idlTexts.map(text => createNext(upgradeFromJson(text)).getRoot()));
     const out = [];
     for (const instruction of instructions) {
         const programRoot = roots.get(instruction.programAddress);

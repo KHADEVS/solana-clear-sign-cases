@@ -1,0 +1,102 @@
+{
+  "class": "adversarial",
+  "context": {
+    "names": {
+      "5iQ9nmZMNNPL8W5dgR9Dm6KrhWAKeLCsuDV16xGXpUVb": "bob.sol",
+      "Ergrx3au6FfTPRqndTByRSMvE43bmmJ8gdEQcpsRJ1Ex": "alice.sol"
+    },
+    "tokenAccounts": {
+      "2YiE4woZ6veiQsnVWPZvdSkFuMpf7G6VCjnYJkjC5C5G": {
+        "mint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+        "owner": "5iQ9nmZMNNPL8W5dgR9Dm6KrhWAKeLCsuDV16xGXpUVb"
+      },
+      "9SwViC9CtEYv2jdXxZQLzPXqruGB2DdrFN199c8fZSzN": {
+        "mint": "EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v",
+        "owner": "Ergrx3au6FfTPRqndTByRSMvE43bmmJ8gdEQcpsRJ1Ex"
+      }
+    }
+  },
+  "expected": {
+    "display": {
+      "generator": "@codama/dynamic-instructions 1.0.0 (codama 1.11.0)",
+      "instructions": [
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "Batched Instructions",
+                "value": "{\"numberOfAccounts\":3,\"instructionData\":[\"base64\",\"A0BLTAAAAAAA\"]}, {\"numberOfAccounts\":3,\"instructionData\":[\"base64\",\"BP//////////\"]}"
+              }
+            ],
+            "intent": "Batch instructions",
+            "interpolatedIntent": null
+          },
+          "program": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ]
+    },
+    "displayNext": {
+      "generator": "@codama/dynamic-instructions 2.0.0-rc.0 (codama 2.0.0-rc.0, IDLs upgraded by @codama/upgrade 2.0.0-rc.0)",
+      "instructions": [
+        {
+          "display": {
+            "fields": [
+              {
+                "label": "Batched Instructions",
+                "value": "(Number Of Accounts: 3, Instruction Data: 0x03404b4c0000000000), (Number Of Accounts: 3, Instruction Data: 0x04ffffffffffffffff)"
+              },
+              {
+                "label": "Remaining Account #1",
+                "value": "9SwViC9CtEYv2jdXxZQLzPXqruGB2DdrFN199c8fZSzN"
+              },
+              {
+                "label": "Remaining Account #2",
+                "value": "2YiE4woZ6veiQsnVWPZvdSkFuMpf7G6VCjnYJkjC5C5G"
+              },
+              {
+                "label": "Remaining Account #3",
+                "value": "Ergrx3au6FfTPRqndTByRSMvE43bmmJ8gdEQcpsRJ1Ex"
+              },
+              {
+                "label": "Remaining Account #4",
+                "value": "9SwViC9CtEYv2jdXxZQLzPXqruGB2DdrFN199c8fZSzN"
+              },
+              {
+                "label": "Remaining Account #5",
+                "value": "HeXdWBYaJwLCktf2aD8LcRJUVA3buA3gEvk1zZw4MBJD"
+              },
+              {
+                "label": "Remaining Account #6",
+                "value": "Ergrx3au6FfTPRqndTByRSMvE43bmmJ8gdEQcpsRJ1Ex"
+              }
+            ],
+            "intent": "Batch instructions",
+            "interpolatedIntent": null
+          },
+          "program": "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA"
+        }
+      ]
+    },
+    "advisories": [
+      {
+        "detail": "2 instructions are packed in one Batch instruction, which the display shows as bytes: Transfer tokens; Approve delegate",
+        "kind": "batched-instructions"
+      },
+      {
+        "detail": "inside the batch: HeXdW...4MBJD may spend practically every token in alice.sol's account, now and later, until the approval is revoked",
+        "kind": "unlimited-approval"
+      }
+    ]
+  },
+  "id": "token-batch-hidden-approve",
+  "idls": [
+    "official/token.json"
+  ],
+  "message": "AQACBc3idfwptDsC2eDWoBgu17+JPs0EZYAr2jo2eEP8IIjRfYKiIjkSPLVeamHE7upQzXtUOIU8/KqIR7s1SQY1DQMW+048yKCP/IjMlq2iqmTHjb4a2CCSXY8zE+CyLiemU/dYHQ2wkUMzRroMxxL9M7LhBv/aWzStmcMi4QEep5HeBt324ddloZPZy+FGzut5rBy0he1fWzeROoz1hX7/AKmqWHMbLYMP3YlswC/O5XmLB9uRRerivoDvNKcTkPtLSwEEBgECAAEDABf/AwkDQEtMAAAAAAADCQT//////////w==",
+  "notes": [
+    "The Token program runs every instruction packed in a Batch (tag 255), each with the next accounts of the list. Simulated on Mainnet on 2026-11-25 with no signature (node tools/codama/batch.mjs): a batch of a transfer and an unlimited approval left a real token account exactly as the two instructions did on their own, with the delegate set for 18446744073709551615. A batch with an unknown tag, and a batch inside a batch, were refused as invalid instructions.",
+    "The official IDL types a batch as a list of (number of accounts, bytes) and gives the instruction no account. Codama 1.0.0 shows the bytes as base64 and no account at all; the 2.0 release candidate shows them as hex and the six accounts as remaining accounts. Neither says what the second instruction does.",
+    "No display can do better from this IDL, and no type in the spec says that bytes hold an instruction. The advisory reads them the way the program does."
+  ],
+  "title": "A Token Batch instruction that carries a transfer and an unlimited approval"
+}

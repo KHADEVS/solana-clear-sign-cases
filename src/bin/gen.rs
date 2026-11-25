@@ -135,6 +135,44 @@ fn approve(ids: &Ids, source: Key, delegate: Key, owner: Key, amount: u64) -> Ne
     }
 }
 
+fn token_transfer(
+    ids: &Ids,
+    source: Key,
+    destination: Key,
+    owner: Key,
+    amount: u64,
+) -> NewInstruction {
+    let mut data = vec![3];
+    data.extend(amount.to_le_bytes());
+    NewInstruction {
+        program: ids.token,
+        accounts: vec![
+            account(source, true),
+            account(destination, true),
+            signer(owner, false),
+        ],
+        data,
+    }
+}
+
+/// A Token `Batch` (tag 255): each instruction as a count of accounts, the
+/// length of its data and the data, with every account in one list.
+fn batch(ids: &Ids, inner: &[NewInstruction]) -> NewInstruction {
+    let mut data = vec![255];
+    let mut accounts = Vec::new();
+    for ix in inner {
+        data.push(ix.accounts.len() as u8);
+        data.push(ix.data.len() as u8);
+        data.extend(&ix.data);
+        accounts.extend(ix.accounts.iter().cloned());
+    }
+    NewInstruction {
+        program: ids.token,
+        accounts,
+        data,
+    }
+}
+
 /// The associated token account of `owner` for `mint` (SPL Token).
 fn ata(ids: &Ids, owner: &Key, mint: &Key) -> Key {
     find_pda(&[owner, &ids.token, mint], &ids.ata).0
@@ -256,6 +294,100 @@ fn approval_case(ids: &Ids, id: &str, title: &str, amount: u64, note: &str) -> V
         )
     )]);
     case["notes"] = json!([note]);
+    case
+}
+
+/// A transfer anyone would expect, and an unlimited approval next to it, both
+/// inside one Batch instruction.
+fn token_batch_hidden_approve(ids: &Ids) -> Value {
+    let alice = test_key("alice");
+    let alice_usdc = ata(ids, &alice, &ids.usdc);
+    let bob = test_key("bob");
+    let bob_usdc = ata(ids, &bob, &ids.usdc);
+    let delegate = test_key("unknown delegate");
+    let inner = [
+        token_transfer(ids, alice_usdc, bob_usdc, alice, 5_000_000),
+        approve(ids, alice_usdc, delegate, alice, u64::MAX),
+    ];
+    let mut case = base_case(
+        "token-batch-hidden-approve",
+        "A Token Batch instruction that carries a transfer and an unlimited approval",
+        "adversarial",
+        &["official/token.json"],
+        &compile_legacy(alice, &[batch(ids, &inner)], test_key("blockhash batch")),
+    );
+    case["context"] = json!({
+        "names": { b58(&alice): "alice.sol", b58(&bob): "bob.sol" },
+        "tokenAccounts": {
+            b58(&alice_usdc): { "owner": b58(&alice), "mint": b58(&ids.usdc) },
+            b58(&bob_usdc): { "owner": b58(&bob), "mint": b58(&ids.usdc) }
+        }
+    });
+    case["expected"]["advisories"] = json!([
+        advisory(
+            "batched-instructions",
+            "2 instructions are packed in one Batch instruction, which the display shows as bytes: Transfer tokens; Approve delegate".into()
+        ),
+        advisory(
+            "unlimited-approval",
+            format!(
+                "inside the batch: {} may spend practically every token in alice.sol's account, now and later, until the approval is revoked",
+                short(&delegate)
+            )
+        )
+    ]);
+    case["notes"] = json!([
+        "The Token program runs every instruction packed in a Batch (tag 255), each with the next accounts of the list. Simulated on Mainnet on 2026-11-25 with no signature (node tools/codama/batch.mjs): a batch of a transfer and an unlimited approval left a real token account exactly as the two instructions did on their own, with the delegate set for 18446744073709551615. A batch with an unknown tag, and a batch inside a batch, were refused as invalid instructions.",
+        "The official IDL types a batch as a list of (number of accounts, bytes) and gives the instruction no account. Codama 1.0.0 shows the bytes as base64 and no account at all; the 2.0 release candidate shows them as hex and the six accounts as remaining accounts. Neither says what the second instruction does.",
+        "No display can do better from this IDL, and no type in the spec says that bytes hold an instruction. The advisory reads them the way the program does."
+    ]);
+    case
+}
+
+/// A confidential withdrawal whose two proofs were verified beforehand: the
+/// instructions sysvar is not in the list, and the accounts after it move up.
+fn confidential_withdraw_omitted_accounts(ids: &Ids) -> Value {
+    let alice = test_key("alice");
+    let mint = test_key("confidential mint");
+    let alice_account = find_pda(&[&alice, &ids.token_2022, &mint], &ids.ata).0;
+    let equality = test_key("equality proof context");
+    let range = test_key("range proof context");
+    // ConfidentialTransferExtension (27), Withdraw (6), amount, decimals, the
+    // new decryptable balance (36 bytes, not shown), and the two proof
+    // offsets: 0 means the proof waits in a context state account.
+    let mut data = vec![27, 6];
+    data.extend(5_000_000u64.to_le_bytes());
+    data.push(6);
+    data.extend([0u8; 36]);
+    data.extend([0, 0]);
+    let withdraw = NewInstruction {
+        program: ids.token_2022,
+        accounts: vec![
+            account(alice_account, true),
+            account(mint, false),
+            account(equality, false),
+            account(range, false),
+            signer(alice, false),
+        ],
+        data,
+    };
+    let mut case = base_case(
+        "confidential-withdraw-omitted-accounts",
+        "A Token-2022 confidential withdrawal whose proofs wait in context accounts",
+        "ordinary",
+        &["official/token-2022.json"],
+        &compile_legacy(alice, &[withdraw], test_key("blockhash confidential")),
+    );
+    case["context"] = json!({ "names": { b58(&alice): "alice.sol" } });
+    case["expected"]["advisories"] = json!([advisory(
+        "omitted-accounts",
+        "\"Withdraw confidential tokens\" leaves out 1 of the 6 accounts its description lists, and the IDL does not say which: from account 3 on, a label may sit on another account".into()
+    )]);
+    case["notes"] = json!([
+        "With both proof offsets at 0, each proof waits in a context state account and the instructions sysvar is not passed: the notes of the official IDL say so. The accounts are the token account, the mint, the equality context, the range context and the authority.",
+        "The IDL marks the three accounts in the middle as optional, left out when absent. Codama 1.0.0 names accounts by position: it takes the equality context for the instructions sysvar, which is never shown, shows the range context as Equality Record and the authority as Range Record, and shows no Authority. The 2.0 release candidate names none of the accounts after the mint: Unidentified Account #1 to #3.",
+        "Which accounts are present follows from the two offsets in the data, and no node of the spec can say that. Six Token-2022 instructions are built this way: confidential transfer, transfer with fee, withdraw, mint, burn and permissioned burn."
+    ]);
     case
 }
 
@@ -787,6 +919,8 @@ fn main() {
         native_stake_delegate(&root),
         jupiter_swap_owner_change(&ids, &root),
         v1_decoy_compute_budget(&ids),
+        token_batch_hidden_approve(&ids),
+        confidential_withdraw_omitted_accounts(&ids),
     ];
     let keep: Vec<String> = cases
         .iter()

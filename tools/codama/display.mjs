@@ -134,14 +134,43 @@ function decodeV1Body(bytes, start, header) {
     };
 }
 
+const BASE58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+
+/** The bytes of a base58 text, as the RPC gives the data of inner instructions. */
+export function fromBase58(text) {
+    let value = 0n;
+    for (const character of text) {
+        const digit = BASE58.indexOf(character);
+        if (digit < 0) throw new Error(`not base58: ${text}`);
+        value = value * 58n + BigInt(digit);
+    }
+    const bytes = [];
+    for (; value > 0n; value >>= 8n) bytes.unshift(Number(value & 0xffn));
+    for (const character of text) {
+        if (character !== '1') break;
+        bytes.unshift(0);
+    }
+    return Uint8Array.from(bytes);
+}
+
+/**
+ * Roots by the address of their programs: the main program of each IDL first,
+ * then the programs an IDL brings along, where no IDL is about them.
+ */
+export function byProgram(roots) {
+    const found = new Map();
+    for (const root of roots) found.set(root.program.publicKey, root);
+    for (const root of roots) {
+        for (const program of root.additionalPrograms ?? []) {
+            if (!found.has(program.publicKey)) found.set(program.publicKey, root);
+        }
+    }
+    return found;
+}
+
 /** Codama roots by program address, from IDL JSON texts. */
 export function loadRoots(idlTexts) {
-    const roots = new Map();
-    for (const text of idlTexts) {
-        const root = createFromJson(text).getRoot();
-        roots.set(root.program.publicKey, root);
-    }
-    return roots;
+    return byProgram(idlTexts.map(text => createFromJson(text).getRoot()));
 }
 
 /** `accounts`: address -> { data: base64, owner?: address }, for fetchAccount. */
