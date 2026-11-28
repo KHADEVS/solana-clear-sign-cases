@@ -69,6 +69,8 @@ Last checked on 2026-11-25 with `@codama/dynamic-instructions` 1.0.0 and 2.0.0-r
 
 Writing it showed four places where the stable release gives a wrong or an empty value (big-endian numbers read backwards, a type that holds itself, an unknown display node, names that are not in camel case), five where it parts from the specification (the payload of an enum variant is never shown, to begin with), and more than twenty where the specification is silent and the code decides: how a label is made from a name, what a slice of text counts, which program must own an account whose state is read. They are all in [DISPLAY.md](DISPLAY.md), each with the probe that shows it.
 
+It is not the only one. Run on the 160 scenarios of [another implementation's fixtures](https://github.com/llbartekll/solana-clear-signing-sdk), which were recorded with an earlier Codama release, the stable release shows something else on 4 and the 2.0 release candidate on 82, while the Rust display here gives what the stable release gives on all 160. DISPLAY.md has the table and the two commands that print it.
+
 ## Running
 
 ```

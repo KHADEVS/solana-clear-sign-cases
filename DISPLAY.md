@@ -12,10 +12,29 @@ A specification with one implementation is whatever that implementation does. A 
 | The probes (`cargo test --test probes`) | 318 | 310, and 8 differences kept on purpose |
 | Four Mainnet blocks kept in `real/survey` (`cargo run --release --bin compare`) | 6,435 | 6,435 |
 | Forty Mainnet blocks, 2026-11-24 18:03 to 2026-11-25 06:37 UTC | 75,938 | 75,938 |
+| The fixtures of another implementation, as they are (see below) | 160 | 160 |
 
 The forty blocks hold 16,272 transactions, 173 of them votes only and left out. Every instruction of a program with an IDL here was compared, top-level and inner (34,230 are inner): Token 22,850, Compute Budget 16,349, System 15,951, Token-2022 12,920, Associated Token Account 6,402, Jupiter 1,456, Memo 5, Stake 5. Codama shows 75,042 of them and nothing for the other 896, and the Rust display shows the same and nothing for the same. `real/survey-day.json` lists the slots; `node tools/codama/survey.mjs --slots <them>` takes them again.
 
 The probes are small IDLs written for the purpose (`tools/codama/probes.mjs`), one per behaviour that the real programs do not reach: each type node, each display node, each way to find an instruction, and data that is short, long or not in its usual form. They found four mistakes in the Rust display that the real instructions had not, and the forty blocks found a fifth that the cases had not (a constant with padding, in every Token-2022 mint that has extensions).
+
+## The same scenarios, three releases
+
+[solana-clear-signing-sdk](https://github.com/llbartekll/solana-clear-signing-sdk) implements a subset of the display in Rust and Swift, and has its own fixtures: 16 sets, 160 scenarios, each with the display that `@codama/dynamic-instructions` 0.4.1 gave, the release it is pinned to. They were written without this repository, and the Rust display here was not written against them. Taken as they are, at commit `c0686b0`:
+
+| On the 160 scenarios | Gives what the fixtures recorded with 0.4.1 |
+| --- | --- |
+| Codama 1.0.0 | 156 |
+| Codama 2.0.0-rc.0 | 78 |
+| The Rust display here | 156, and on all 160 it gives what 1.0.0 gives |
+
+The four that 1.0.0 shows otherwise are in the `enum-display` set. An enum inside a struct shown as JSON was its number in 0.4.1 (`{"side":1,"qty":7}`) and is an object in 1.0.0 (`{"side":{"__discriminator":1,"__kind":"SellNow"},"qty":7}`). And where the decimals of an amount are read from an account field that is an enum, 0.4.1 scaled the amount ("15") and 1.0.0 does not ("150 (raw)").
+
+Of the 82 that the release candidate shows otherwise, 55 have the same fields with another text (a date without its zero milliseconds, a struct as `Name: meta, Rank: 3`), 16 do not have the same fields, 6 show a display where an error was recorded, 3 are refused, and 2 show raw an amount that was recorded with its decimals.
+
+So an implementation can pass all of its own tests and show another text than its neighbour for the same instruction: each is held to the release it was written against, and nothing is shared. `node tools/codama/peers-fetch.mjs llbartekll/solana-clear-signing-sdk <commit> <dir>` takes the fixtures again, `node tools/codama/peers.mjs <dir> <out.json>` prints the table, and `PEER_SCENARIOS=<out.json> cargo test --test peers -- --nocapture` runs the Rust display on them.
+
+One trap met on the way: the release candidate takes account data through `fetchAccounts`, where the stable release takes `fetchAccount`. Given under the old name, the option is ignored without a word, and every amount that needs an account reads "(raw)". The probes of this repository recorded five answers of the release candidate that way until 2026-11-28.
 
 ## Where the two differ, on purpose
 
@@ -75,6 +94,6 @@ What the stable release does where the text is silent, and the Rust display with
 
 ## What is not there
 
-- **The 2.0 release candidate.** It is a rewrite, and its text differs on most values (`None`, `Empty`, structs as `X: 1, Y: 2`). The cases keep what it gives in `expected.displayNext`; the Rust display will follow 2.0 once it is released.
+- **The 2.0 release candidate.** It is a rewrite, and its text is another for many values (`None`, `Empty`, structs as `X: 1, Y: 2`): it does not give what the stable release gives on 90 of the 318 probes and on 9 of the 54 instructions of the cases. The cases keep what it gives in `expected.displayNext`; the Rust display will follow 2.0 once it is released.
 - **A constant written as a map**, and offsets inside a constant other than padding and the ones that stay within its own bytes. No IDL here has either.
 - Events, PDAs and resolvers, which the instruction display does not use.
