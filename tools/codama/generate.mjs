@@ -13,7 +13,7 @@ import { getInstructionDisplay as displayNext } from 'dynamic-instructions-rc';
 import { createFromRoot as createNext } from 'codama-rc';
 import { upgradeFromJson } from 'codama-upgrade-rc';
 
-import { byProgram, decodeMessage, displayInstructions, loadRoots, makeFetchAccount } from './display.mjs';
+import { byProgram, decodeMessage, displayInstructions, fetchSeveral, loadRoots, makeFetchAccount } from './display.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '../..');
@@ -32,7 +32,7 @@ async function displaysNext(instructions, idlTexts, fetchAccount) {
         let error;
         if (programRoot) {
             try {
-                display = await displayNext(programRoot, instruction, { fetchAccount });
+                display = await displayNext(programRoot, instruction, { fetchAccounts: fetchSeveral(fetchAccount) });
             } catch (e) {
                 error = String(e.message ?? e);
             }

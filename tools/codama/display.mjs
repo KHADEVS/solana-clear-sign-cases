@@ -191,6 +191,13 @@ export function makeFetchAccount(accounts = {}) {
     };
 }
 
+/**
+ * The 2.0 release candidate takes account data through `fetchAccounts`, several addresses
+ * at a time, where the stable release takes `fetchAccount`. Given under the old name, the
+ * option is ignored without a word and every amount that needs an account reads "(raw)".
+ */
+export const fetchSeveral = fetchAccount => addresses => Promise.all(addresses.map(fetchAccount));
+
 /** What Codama displays for each instruction: its display, `null` when it cannot identify it. */
 export async function displayInstructions(instructions, roots, fetchAccount) {
     const out = [];

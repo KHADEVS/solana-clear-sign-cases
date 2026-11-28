@@ -18,7 +18,7 @@ import { getInstructionDisplay } from '@codama/dynamic-instructions';
 import { AccountRole } from '@solana/instructions';
 import { createFromJson } from 'codama';
 
-import { makeFetchAccount } from './display.mjs';
+import { fetchSeveral, makeFetchAccount } from './display.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const file = path.resolve(here, '../../tests/probes.json');
@@ -538,9 +538,9 @@ function wellFormed(display) {
     return broken ? { display: fixed, halfSurrogate: true } : { display };
 }
 
-async function shown(render, root, instruction, fetchAccount) {
+async function shown(render, root, instruction, options) {
     try {
-        return wellFormed(await render(root, instruction, { fetchAccount }));
+        return wellFormed(await render(root, instruction, options));
     } catch (e) {
         return { display: null, error: String(e.message ?? e).split('\n')[0].slice(0, 200) };
     }
@@ -559,7 +559,7 @@ for (const p of probes) {
     const fetchAccount = makeFetchAccount(p.fetch);
     let next;
     try {
-        next = await shown(displayNext, createNext(upgradeFromJson(text)).getRoot(), instruction, fetchAccount);
+        next = await shown(displayNext, createNext(upgradeFromJson(text)).getRoot(), instruction, { fetchAccounts: fetchSeveral(fetchAccount) });
     } catch (e) {
         next = { display: null, error: `the IDL does not upgrade: ${String(e.message ?? e).split('\n')[0].slice(0, 160)}` };
     }
@@ -570,7 +570,7 @@ for (const p of probes) {
         accounts: p.accountsGiven ?? [],
         data: Buffer.from(p.data).toString('hex'),
         fetch: p.fetch,
-        stable: await shown(getInstructionDisplay, createFromJson(text).getRoot(), instruction, fetchAccount),
+        stable: await shown(getInstructionDisplay, createFromJson(text).getRoot(), instruction, { fetchAccount }),
         next,
     });
 }
